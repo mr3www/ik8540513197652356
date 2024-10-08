@@ -75,14 +75,21 @@ WSGI_APPLICATION = 'injurykick.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'sys',  # Tên cơ sở dữ liệu bạn đã tạo
+#         'USER': 'root',  # Tên người dùng MySQL của bạn
+#         'PASSWORD': 'Woody1146709',  # Mật khẩu MySQL của bạn
+#         'HOST': '127.0.0.1',  # Địa chỉ máy chủ (thường là localhost)
+#         'PORT': '3306',  # Cổng MySQL (mặc định là 3306)
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'sys',  # Tên cơ sở dữ liệu bạn đã tạo
-        'USER': 'root',  # Tên người dùng MySQL của bạn
-        'PASSWORD': 'Woody1146709',  # Mật khẩu MySQL của bạn
-        'HOST': '127.0.0.1',  # Địa chỉ máy chủ (thường là localhost)
-        'PORT': '3306',  # Cổng MySQL (mặc định là 3306)
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / "db.sqlite3",  # Tạo file SQLite trong thư mục dự án
     }
 }
 

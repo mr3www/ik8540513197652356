@@ -1,0 +1,12 @@
+Oke vậy tôi sẽ viết lại quá trình như sau : 
+
+1. Call API request("GET", "/v3/leagues", headers=headers) 
+> Save dữ liệu vào model League
+2. 
+Call API request("GET", "/v3/fixtures?league={39}&season={2024}", headers=headers)
+Call API request("GET", "/v3/fixtures?league={140}&season={2024}", headers=headers) 
+Call API request("GET", "/v3/fixtures?league={135}&season={2024}", headers=headers) 
+Call API request("GET", "/v3/fixtures?league={78}&season={2024}", headers=headers) 
+Call API request("GET", "/v3/fixtures?league={61}&season={2024}", headers=headers)
+> Gộp tất cả dữ liệu call và Save dữ liệu vào model Match
+> Lấy ra thông tin League_id, League_name, Season, Team_id, Team_name và lưu vào model mới mang tên "LeagueTeam" 
