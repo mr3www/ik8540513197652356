@@ -24,6 +24,11 @@
         <button type="submit">Fetch & Save Teams</button>
     </form>
     <br>
+    <form action="{% url 'fetch_and_save_teams_statistic' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Fetch & Save Team Statistics</button>
+    </form>
+    <br>
     <form action="{% url 'fetch_and_save_matches' %}" method="post">
         {% csrf_token %}
         <button type="submit">Fetch & Save Matches</button>

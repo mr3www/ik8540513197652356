@@ -14,6 +14,7 @@ class Country(models.Model): # request("GET", "/v3/fixtures?league=39&season=202
     def __str__(self):
         return self.country_name
 
+
 #---------------------------------------------------------------------------------------------------------------
 class League(models.Model):  # request("GET", "/v3/leagues", headers=headers)
     id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho id tự động tăng
@@ -27,17 +28,31 @@ class League(models.Model):  # request("GET", "/v3/leagues", headers=headers)
 
     def __str__(self):
         return self.name
-    
-#---------------------------------------------------------------------------------------------------------------
-class LeagueTeam(models.Model):
-    id = models.AutoField(primary_key=True)
-    league_id = models.PositiveIntegerField(unique=True)  # Đảm bảo rằng league_id là duy nhất
-    league_name = models.CharField(max_length=255)
-    team_id = models.PositiveIntegerField()
-    team_name = models.CharField(max_length=255)
 
-    def __str__(self):
-        return f"{self.league_name} - {self.team_name}"
+
+#---------------------------------------------------------------------------------------------------------------
+class LeagueStanding(models.Model):
+    league_id = models.IntegerField()
+    league_name = models.CharField(max_length=100)
+    country_name = models.CharField(max_length=100)
+    season = models.IntegerField()
+    rank = models.IntegerField()
+    team_id = models.IntegerField()
+    team_name = models.CharField(max_length=100)
+    logo = models.URLField()
+    points = models.IntegerField()
+    goals_diff = models.IntegerField()
+    played = models.IntegerField()
+    win = models.IntegerField()
+    draw = models.IntegerField()
+    lose = models.IntegerField()
+    goals_for = models.IntegerField()
+    goals_against = models.IntegerField()
+    update_time = models.DateTimeField()
+
+    class Meta:
+        unique_together = ('league_id', 'season', 'rank')    
+
 
 #---------------------------------------------------------------------------------------------------------------
 class Team(models.Model):  # request("GET", "/v3/teams?id={33}", headers=headers) . Need to find teamsid from League Standing
@@ -59,88 +74,10 @@ class Team(models.Model):  # request("GET", "/v3/teams?id={33}", headers=headers
     def __str__(self):
         return self.name
 
-#---------------------------------------------------------------------------------------------------------------
-class Match(models.Model):  #request("GET", "/v3/fixtures?league={39}&season={2020}", headers=headers)
-    id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho id tự động tăng
-    api_id = models.IntegerField(null=True, blank=True, db_index=True, unique=True)  # ID từ API-FOOTBALL
-    season = models.IntegerField(null=True, blank=True)
-    league_id = models.ForeignKey(League, to_field='api_id', related_name='matches', on_delete=models.CASCADE, unique=False)
-    country_name = models.CharField(max_length=255)
-    home = models.ForeignKey(Team, to_field='api_id', related_name='home_matches', on_delete=models.CASCADE)
-    away = models.ForeignKey(Team, to_field='api_id', related_name='away_matches', on_delete=models.CASCADE)
-    date = models.DateTimeField(db_index=True)
-    status = models.CharField(max_length=100)
-    referee = models.CharField(max_length=255, null=True, blank=True)
-    venue_id = models.IntegerField(null=True, blank=True)
-    venue_name = models.CharField(max_length=255, null=True, blank=True)
-    venue_city = models.CharField(max_length=255, null=True, blank=True)
-    ht_home = models.IntegerField(null=True, blank=True)
-    ht_away = models.IntegerField(null=True, blank=True)
-    ft_home = models.IntegerField(null=True, blank=True)
-    ft_away = models.IntegerField(null=True, blank=True)
-    et_home = models.IntegerField(null=True, blank=True)
-    et_away = models.IntegerField(null=True, blank=True)
-    pk_home = models.IntegerField(null=True, blank=True)
-    pk_away = models.IntegerField(null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.home} vs {self.away} - {self.league_id}"
-
-#---------------------------------------------------------------------------------------------------------------
-class Player(models.Model):  # request("GET", "/v3/players?id={276}&season={2020}", headers=headers)
-    id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho id tự động tăng
-    api_id = models.IntegerField(null=True, blank=True, db_index=True, unique=True)  # ID từ API-FOOTBALL
-    name = models.CharField(max_length=255)
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    date_of_birth = models.DateField(blank=True, null=True)
-    nationality = models.CharField(max_length=100, blank=True, null=True)
-    height = models.CharField(max_length=10, blank=True, null=True)  # e.g., "1.80m"
-    position = models.CharField(max_length=50)
-    image = models.URLField(blank=True, null=True)
-    slug = models.SlugField(max_length=255, unique=True, blank=True)  # Thêm slug cho URL thân thiện
-
-    def full_name(self):
-        return f"{self.first_name} {self.last_name}"
-
-    def __str__(self):
-        return f"{self.name}"
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
-
-#---------------------------------------------------------------------------------------------------------------
-class PlayerTeam(models.Model):  # Crawling Data From Transfermarkt
-    id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho id tự động tăng
-    api_id = models.IntegerField(null=True, blank=True, db_index=True, unique=True)  # Thêm api_id nếu cần
-    player = models.ForeignKey(Player, on_delete=models.CASCADE)
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    joined = models.DateField()
-    left = models.DateField(null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.player.full_name()} - {self.team.name}"
-
-#---------------------------------------------------------------------------------------------------------------
-class Injury(models.Model):  # Crawling Data From Soccerway or Transfermarkt
-    id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho id tự động tăng
-    api_id = models.IntegerField(null=True, blank=True, db_index=True, unique=True)  # Thêm api_id nếu cần
-    league = models.ForeignKey(League, to_field='api_id', related_name='injuries', on_delete=models.CASCADE)  # Mối quan hệ với League
-    player = models.ForeignKey(Player, to_field='api_id', related_name='injuries', on_delete=models.CASCADE)  # Mối quan hệ với Player
-    team = models.ForeignKey(Team, to_field='api_id', related_name='injuries', on_delete=models.CASCADE)  # Mối quan hệ với Team
-    injury_type = models.CharField(max_length=255)  # Loại chấn thương
-    injury_date = models.DateField()  # Ngày bị chấn thương
-    expected_return = models.DateField(null=True, blank=True)  # Ngày dự kiến trở lại
-
-    def __str__(self):
-        return f"Injury: {self.player.name} ({self.injury_type}) - {self.injury_date}"
 
 #---------------------------------------------------------------------------------------------------------------
 class TeamSeasonStatistics(models.Model):  #request("GET", "/v3/teams/statistics?league={39}&season={2020}&team={33}", headers=headers)
     id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho ID
-    api_id = models.IntegerField(db_index=True)  # Thêm trường api_id để lưu ID từ API
     team = models.ForeignKey('Team', to_field='api_id', on_delete=models.CASCADE, related_name='season_statistics')
     league = models.ForeignKey('League', to_field='api_id', on_delete=models.CASCADE, related_name='season_statistics')
     
@@ -174,7 +111,9 @@ class TeamSeasonStatistics(models.Model):  #request("GET", "/v3/teams/statistics
     loses_home = models.IntegerField(default=0)
     wins_away = models.IntegerField(default=0)
     wins_home = models.IntegerField(default=0)
-    
+    played_away = models.IntegerField(default=0)
+    played_home = models.IntegerField(default=0)
+
     # Phong độ gần đây
     form = models.CharField(max_length=10, null=True, blank=True)  # Ví dụ: "LWLWD"
     
@@ -222,6 +161,101 @@ class TeamSeasonStatistics(models.Model):  #request("GET", "/v3/teams/statistics
 
     def __str__(self):
         return f'{self.team.name} - {self.league.name} ({self.id})'
+
+
+#---------------------------------------------------------------------------------------------------------------
+class Match(models.Model):  #request("GET", "/v3/fixtures?league={39}&season={2020}", headers=headers)
+    id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho id tự động tăng
+    api_id = models.IntegerField(null=True, blank=True, db_index=True, unique=True)  # ID từ API-FOOTBALL
+    season = models.IntegerField(null=True, blank=True)
+    league_id = models.ForeignKey(League, to_field='api_id', related_name='matches', on_delete=models.CASCADE, unique=False)
+    country_name = models.CharField(max_length=255)
+    home = models.ForeignKey(Team, to_field='api_id', related_name='home_matches', on_delete=models.CASCADE)
+    away = models.ForeignKey(Team, to_field='api_id', related_name='away_matches', on_delete=models.CASCADE)
+    date = models.DateTimeField(db_index=True)
+    status = models.CharField(max_length=100)
+    referee = models.CharField(max_length=255, null=True, blank=True)
+    venue_id = models.IntegerField(null=True, blank=True)
+    venue_name = models.CharField(max_length=255, null=True, blank=True)
+    venue_city = models.CharField(max_length=255, null=True, blank=True)
+    ht_home = models.IntegerField(null=True, blank=True)
+    ht_away = models.IntegerField(null=True, blank=True)
+    ft_home = models.IntegerField(null=True, blank=True)
+    ft_away = models.IntegerField(null=True, blank=True)
+    et_home = models.IntegerField(null=True, blank=True)
+    et_away = models.IntegerField(null=True, blank=True)
+    pk_home = models.IntegerField(null=True, blank=True)
+    pk_away = models.IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.home} vs {self.away} - {self.league_id}"
+
+
+#---------------------------------------------------------------------------------------------------------------
+class LeagueTeam(models.Model):
+    id = models.AutoField(primary_key=True)
+    league_id = models.PositiveIntegerField(unique=True)  # Đảm bảo rằng league_id là duy nhất
+    league_name = models.CharField(max_length=255)
+    team_id = models.PositiveIntegerField()
+    team_name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.league_name} - {self.team_name}"
+
+
+#---------------------------------------------------------------------------------------------------------------
+class Player(models.Model):  # request("GET", "/v3/players?id={276}&season={2020}", headers=headers)
+    id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho id tự động tăng
+    api_id = models.IntegerField(null=True, blank=True, db_index=True, unique=True)  # ID từ API-FOOTBALL
+    name = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    date_of_birth = models.DateField(blank=True, null=True)
+    nationality = models.CharField(max_length=100, blank=True, null=True)
+    height = models.CharField(max_length=10, blank=True, null=True)  # e.g., "1.80m"
+    position = models.CharField(max_length=50)
+    image = models.URLField(blank=True, null=True)
+    slug = models.SlugField(max_length=255, unique=True, blank=True)  # Thêm slug cho URL thân thiện
+
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
+    def __str__(self):
+        return f"{self.name}"
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+
+#---------------------------------------------------------------------------------------------------------------
+class PlayerTeam(models.Model):  # Crawling Data From Transfermarkt
+    id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho id tự động tăng
+    api_id = models.IntegerField(null=True, blank=True, db_index=True, unique=True)  # Thêm api_id nếu cần
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    joined = models.DateField()
+    left = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.player.full_name()} - {self.team.name}"
+
+
+#---------------------------------------------------------------------------------------------------------------
+class Injury(models.Model):  # Crawling Data From Soccerway or Transfermarkt
+    id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho id tự động tăng
+    api_id = models.IntegerField(null=True, blank=True, db_index=True, unique=True)  # Thêm api_id nếu cần
+    league = models.ForeignKey(League, to_field='api_id', related_name='injuries', on_delete=models.CASCADE)  # Mối quan hệ với League
+    player = models.ForeignKey(Player, to_field='api_id', related_name='injuries', on_delete=models.CASCADE)  # Mối quan hệ với Player
+    team = models.ForeignKey(Team, to_field='api_id', related_name='injuries', on_delete=models.CASCADE)  # Mối quan hệ với Team
+    injury_type = models.CharField(max_length=255)  # Loại chấn thương
+    injury_date = models.DateField()  # Ngày bị chấn thương
+    expected_return = models.DateField(null=True, blank=True)  # Ngày dự kiến trở lại
+
+    def __str__(self):
+        return f"Injury: {self.player.name} ({self.injury_type}) - {self.injury_date}"
+
 
 #---------------------------------------------------------------------------------------------------------------
 class PlayerSeasonStatistics(models.Model):    #request("GET", "/v3/players?league={39}&season={2020}", headers=headers)
@@ -284,28 +318,6 @@ class PlayerSeasonStatistics(models.Model):    #request("GET", "/v3/players?leag
     def __str__(self):
         return f'{self.player.name} - {self.team.name} ({self.id})'
 
-#---------------------------------------------------------------------------------------------------------------
-class LeagueStanding(models.Model):
-    league_id = models.IntegerField()
-    league_name = models.CharField(max_length=100)
-    country_name = models.CharField(max_length=100)
-    season = models.IntegerField()
-    rank = models.IntegerField()
-    team_id = models.IntegerField()
-    team_name = models.CharField(max_length=100)
-    logo = models.URLField()
-    points = models.IntegerField()
-    goals_diff = models.IntegerField()
-    played = models.IntegerField()
-    win = models.IntegerField()
-    draw = models.IntegerField()
-    lose = models.IntegerField()
-    goals_for = models.IntegerField()
-    goals_against = models.IntegerField()
-    update_time = models.DateTimeField()
-
-    class Meta:
-        unique_together = ('league_id', 'season', 'rank')
 
 #---------------------------------------------------------------------------------------------------------------
 class StandingDescription(models.Model): #request("GET", "/v3/standings?league={39}&season={2020}", headers=headers)
@@ -320,6 +332,7 @@ class StandingDescription(models.Model): #request("GET", "/v3/standings?league={
     class Meta:
         unique_together = ('league', 'season', 'rank')  # Đảm bảo mỗi league, season, rank là duy nhất
 
+
 #---------------------------------------------------------------------------------------------------------------
 class StandingDeduction(models.Model):  #Crawling Data to check if whether it have team be deduction points for any reason
     league = models.ForeignKey(League, to_field='api_id', on_delete=models.CASCADE)
@@ -330,6 +343,7 @@ class StandingDeduction(models.Model):  #Crawling Data to check if whether it ha
 
     def __str__(self):
         return f"{self.league} - {self.season} - Team: {self.team} - Reason: {self.description} - Points deduction: {self.points_deduction}"
+
 
 #---------------------------------------------------------------------------------------------------------------
 #https://rapidapi.com/people-api-people-api-default/api/football-news11/playground/apiendpoint_7ba472f9-5c31-4342-a378-3fcfd45c7181
@@ -344,5 +358,6 @@ class News(models.Model):  # request("GET", "/api/news-by-date?date=2024-01-01&l
 
     def __str__(self):
         return self.title
+
 
 #---------------------------------------------------------------------------------------------------------------
