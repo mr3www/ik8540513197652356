@@ -177,14 +177,16 @@ def fetch_and_save_team_info(team_id):
 #---------------------------------------------------------------------------------------------------------------
 def fetch_and_save_teams_statistic(request):
     season = 2024
-    grouped_data = LeagueStanding.objects.filter(season=season).values('league_id')
+    grouped_data = LeagueStanding.objects.filter(season=season).values('league_id').distinct()
 
     # Duyệt qua từng mùa giải và giải đấu
     for group in grouped_data:
         league_id = group['league_id']
+        print(f"Processing league_id: {league_id}")
 
         # Lấy danh sách các đội bóng theo league_id và season
         teams_in_league = LeagueStanding.objects.filter(league_id=league_id).values('team_id')
+        print(f"Teams in league {league_id}: {list(teams_in_league)}")  # In ra danh sách đội
 
         # Gọi API cho từng team và lưu dữ liệu
         for team in teams_in_league:
@@ -192,7 +194,7 @@ def fetch_and_save_teams_statistic(request):
             print(f"Processing team_id: {team_id}")
 
             # Gọi hàm fetch_and_save_team_data để gọi API và lưu dữ liệu vào model Team
-            fetch_and_save_team_statistics_data(league_id, season, team_id)
+            # fetch_and_save_team_statistics_data(league_id, season, team_id)
 
     return HttpResponse("Team Statistics imported successfully.")
     
@@ -325,29 +327,17 @@ def fetch_and_save_team_statistics_data(league_id, season, team_id):
 
             penalty_data_missed_total = penalty_data_missed['total']
             penalty_data_scored_total = penalty_data_scored['total']
-            
-            team_id_row = team_data['id']
-            league_id_row = league_data['id']
-
-            # Retrieve or create the Team instance
-            team_instance, _ = Team.objects.get_or_create(
-                api_id=team_data['id'],  # or use another unique identifier if needed
-                defaults={
-                    'name': team_data.get('name'),
-                    'country': team_data.get('country'),
-                    'founded': team_data.get('founded'),
-                    'image': team_data.get('image'),
-                    # Add other fields as necessary
-                }
-            )
 
             # Lưu hoặc cập nhật dữ liệu team vào cơ sở dữ liệu
             try:
+                team_instance = Team.objects.get(api_id=team_data['id'])
+                league_instance = League.objects.get(api_id=league_data['id'])
                 team, created = TeamSeasonStatistics.objects.update_or_create(
-                    team=team_instance,
+                    team=team_instance,  # Ensure this matches the field name in your model
+                    league=league_instance,
                     defaults={
-                        'team': team_id_row,
-                        'league': league_id_row,
+                        'team': team_instance,
+                        'league': league_instance,
                         'biggest_goals_home': biggest_data_goals_for_home,
                         'biggest_goals_away': biggest_data_goals_for_away,
                         'biggest_against_home': biggest_data_goals_against_home,
@@ -384,29 +374,29 @@ def fetch_and_save_team_statistics_data(league_id, season, team_id):
                         'form': form_data,
 
                         # New: Goals and conceded goals by time
-                        'goals_0_15': goals_data_for_minute_0_15_total,
-                        'goals_16_30': goals_data_for_minute_16_30_total,
-                        'goals_31_45': goals_data_for_minute_31_45_total,
-                        'goals_46_60': goals_data_for_minute_46_60_total,
-                        'goals_61_75': goals_data_for_minute_61_75_total,
-                        'goals_76_90': goals_data_for_minute_76_90_total,
-                        'goals_91_105': goals_data_for_minute_91_105_total,
-                        'goals_106_120': goals_data_for_minute_106_120_total,
-
-                        'against_0_15': goals_data_against_minute_0_15_total,
-                        'against_16_30': goals_data_against_minute_16_30_total,
-                        'against_31_45': goals_data_against_minute_31_45_total,
-                        'against_46_60': goals_data_against_minute_46_60_total,
-                        'against_61_75': goals_data_against_minute_61_75_total,
-                        'against_76_90': goals_data_against_minute_76_90_total,
-                        'against_91_105': goals_data_against_minute_91_105_total,
-                        'against_106_120': goals_data_against_minute_106_120_total,
+                        'goals_0_15': goals_data_for_minute_0_15_total if goals_data_for_minute_0_15_total is not None else 0,
+                        'goals_16_30': goals_data_for_minute_16_30_total if goals_data_for_minute_16_30_total is not None else 0,
+                        'goals_31_45': goals_data_for_minute_31_45_total if goals_data_for_minute_31_45_total is not None else 0,
+                        'goals_46_60': goals_data_for_minute_46_60_total if goals_data_for_minute_46_60_total is not None else 0,
+                        'goals_61_75': goals_data_for_minute_61_75_total if goals_data_for_minute_61_75_total is not None else 0,
+                        'goals_76_90': goals_data_for_minute_76_90_total if goals_data_for_minute_76_90_total is not None else 0,
+                        'goals_91_105': goals_data_for_minute_91_105_total if goals_data_for_minute_91_105_total is not None else 0,
+                        'goals_106_120': goals_data_for_minute_106_120_total if goals_data_for_minute_106_120_total is not None else 0,
+                        
+                        'against_0_15': goals_data_against_minute_0_15_total if goals_data_against_minute_0_15_total is not None else 0,
+                        'against_16_30': goals_data_against_minute_16_30_total if goals_data_against_minute_16_30_total is not None else 0,
+                        'against_31_45': goals_data_against_minute_31_45_total if goals_data_against_minute_31_45_total is not None else 0,
+                        'against_46_60': goals_data_against_minute_46_60_total if goals_data_against_minute_46_60_total is not None else 0,
+                        'against_61_75': goals_data_against_minute_61_75_total if goals_data_against_minute_61_75_total is not None else 0,
+                        'against_76_90': goals_data_against_minute_76_90_total if goals_data_against_minute_76_90_total is not None else 0,
+                        'against_91_105': goals_data_against_minute_91_105_total if goals_data_against_minute_91_105_total is not None else 0,
+                        'against_106_120': goals_data_against_minute_106_120_total if goals_data_against_minute_106_120_total is not None else 0,
 
                         # New: Favorite lineups
                         'favorite_lineups': lineups_data_0_formation,
-                        'favorite_lineups_count': lineups_data_0_played,
+                        'favorite_lineups_count': lineups_data_0_played if lineups_data_0_played != '' else 0,
                         'secondary_lineups': lineups_data_1_formation,
-                        'secondary_lineups_count': lineups_data_1_played,
+                        'secondary_lineups_count': lineups_data_1_played if lineups_data_1_played != '' else 0,
                     }
                 )
                 print(f"{'Created' if created else 'Updated'}: {team}")
@@ -420,100 +410,103 @@ def fetch_and_save_team_statistics_data(league_id, season, team_id):
 
 #---------------------------------------------------------------------------------------------------------------
 def fetch_and_save_matches(request):
-    url = "https://api-football-v1.p.rapidapi.com/v3/fixtures"
-    querystring = {"league": "39", "season": "2024"}
+    season = 2024
+    grouped_data = LeagueStanding.objects.filter(season=season).values('league_id').distinct()
 
-    headers = {
-        "x-rapidapi-key": "69add1c8a2mshd66c5aa11eccb10p1c1f6bjsnd3f6750e5f0a",
-        "x-rapidapi-host": "api-football-v1.p.rapidapi.com"
-    }
+    for group in grouped_data:
+        league_id = group['league_id']
+        print(f"Processing league_id: {league_id} , season {season}")
 
-    response = requests.get(url, headers=headers, params=querystring)
-    matches = response.json()
+        url = "https://api-football-v1.p.rapidapi.com/v3/fixtures"
+        querystring = {"league": league_id, "season": season}
 
-    for match in matches['response']:
-        fixture_data = match['fixture']
-        league_data = match['league']
-        teams_data = match['teams']
-        score_data = match['score']
+        response = requests.get(url, headers=headers, params=querystring)
+        matches = response.json()
 
-        # Trích xuất thông tin từ fixture
-        match_id = fixture_data['id']
-        date = fixture_data['date']
-        venue_id = fixture_data['venue']['id']
-        venue_name = fixture_data['venue']['name']
-        venue_city = fixture_data['venue']['city']
-        status = fixture_data['status']['long']
-        referee = fixture_data.get('referee', 'Unknown')  # Tránh lỗi nếu referee không có trong dữ liệu
+        for match in matches['response']:
+            fixture_data = match['fixture']
+            league_data = match['league']
+            teams_data = match['teams']
+            score_data = match['score']
 
-        # Trích xuất thông tin từ league
-        league_id = league_data['id']
-        league_name = league_data['name']
-        country_name = league_data['country']
-        season = league_data['season']
+            # Trích xuất thông tin từ fixture
+            match_id = fixture_data['id'] # api_id
+            date = fixture_data['date'] #date
+            venue_id = fixture_data['venue']['id'] #venue_id
+            venue_name = fixture_data['venue']['name'] #venue_name
+            venue_city = fixture_data['venue']['city'] #venue_city
+            status = fixture_data['status']['short'] #status
+            referee = fixture_data.get('referee', 'Unknown') #referee  # Tránh lỗi nếu referee không có trong dữ liệu
 
-        # Trích xuất thông tin từ teams
-        home_team_id = teams_data['home']['id']
-        away_team_id = teams_data['away']['id']
+            # Trích xuất thông tin từ league
+            league_id = league_data['id'] #league_id
+            league_name = league_data['name']
+            country_name = league_data['country'] #country_name
+            season = league_data['season'] #season
+            round = league_data['round'] #round
 
-        home_team_name = teams_data['home']['name']
-        away_team_name = teams_data['away']['name']
+            # Trích xuất thông tin từ teams
+            home_team_id = teams_data['home']['id'] #home
+            away_team_id = teams_data['away']['id'] #away
 
-        # Trích xuất thông tin từ score
-        ht_score_data = score_data['halftime']
-        ft_score_data = score_data['fulltime']
-        et_score_data = score_data['extratime']
-        pk_score_data = score_data['penalty']
+            home_team_name = teams_data['home']['name']
+            away_team_name = teams_data['away']['name']
 
-        ht_home = ht_score_data['home']
-        ht_away = ht_score_data['away']
-        ft_home = ft_score_data['home']
-        ft_away = ft_score_data['away']
-        et_home = et_score_data.get('home')  # Xử lý trường hợp extratime là null
-        et_away = et_score_data.get('away')
-        pk_home = pk_score_data.get('home')
-        pk_away = pk_score_data.get('away')
+            # Trích xuất thông tin từ score
+            ht_score_data = score_data['halftime']
+            ft_score_data = score_data['fulltime']
+            et_score_data = score_data['extratime']
+            pk_score_data = score_data['penalty']
 
-        home_team = Team.objects.get(api_id=home_team_id)
-        away_team = Team.objects.get(api_id=away_team_id)
-        league_id_new = League.objects.get(api_id=league_id)
+            ht_home = ht_score_data['home'] #ht_home
+            ht_away = ht_score_data['away'] #ht_away
+            ft_home = ft_score_data['home'] #ft_home
+            ft_away = ft_score_data['away'] #ft_away
+            et_home = et_score_data.get('home') #et_home  # Xử lý trường hợp extratime là null
+            et_away = et_score_data.get('away') #et_away
+            pk_home = pk_score_data.get('home') #pk_home
+            pk_away = pk_score_data.get('away') #pk_away
 
-        # Cập nhật hoặc tạo mới Match
-        Match.objects.update_or_create(
-            api_id=match_id,
-            defaults={
-                'api_id': match_id,
-                'season': season,
-                'league_id': league_id_new,
-                'country_name': country_name,
-                'home': home_team,
-                'away': away_team,
-                'date': date,
-                'status': status,
-                'referee': referee,
-                'venue_id': venue_id,
-                'venue_name': venue_name,
-                'venue_city': venue_city,
-                'ht_home': ht_home,
-                'ht_away': ht_away,
-                'ft_home': ft_home,
-                'ft_away': ft_away,
-                'et_home': et_home,
-                'et_away': et_away,
-                'pk_home': pk_home,
-                'pk_away': pk_away,
-            }
-        )
+            home_team = Team.objects.get(api_id=home_team_id)
+            away_team = Team.objects.get(api_id=away_team_id)
+            league_id_new = League.objects.get(api_id=league_id)
 
-        # Cập nhật hoặc tạo mới LeagueTeam cho cả đội nhà và đội khách
-        LeagueTeam.objects.update_or_create(
-            team_id=home_team_id,
-            defaults={
-                'league_id': league_id_new.id,
-                'league_name': league_name,
-                'team_id': home_team_id,
-                'team_name': home_team_name,
-            }
-        )
+            # Cập nhật hoặc tạo mới Match
+            Match.objects.update_or_create(
+                api_id=match_id,
+                defaults={
+                    'api_id': match_id,
+                    'season': season,
+                    'league_id': league_id_new,
+                    'country_name': country_name,
+                    'home': home_team,
+                    'away': away_team,
+                    'date': date,
+                    'status': status,
+                    'referee': referee,
+                    'venue_id': venue_id,
+                    'venue_name': venue_name,
+                    'venue_city': venue_city,
+                    'ht_home': ht_home,
+                    'ht_away': ht_away,
+                    'ft_home': ft_home,
+                    'ft_away': ft_away,
+                    'et_home': et_home,
+                    'et_away': et_away,
+                    'pk_home': pk_home,
+                    'pk_away': pk_away,
+                }
+            )
+
+            # Cập nhật hoặc tạo mới LeagueTeam cho cả đội nhà và đội khách
+            LeagueTeam.objects.update_or_create(
+                team_id=home_team_id,
+                defaults={
+                    'league_id': league_id_new.id,
+                    'league_name': league_name,
+                    'team_id': home_team_id,
+                    'team_name': home_team_name,
+                }
+            )
 
     return HttpResponse("Matches imported successfully.")
