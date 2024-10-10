@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
-from .models import League, Match, LeagueTeam, LeagueStanding, Team, TeamSeasonStatistics
+from .models import League, Match, LeagueStanding, Team, TeamSeasonStatistics, Player, PlayerSeasonStatistics
 import http.client
 import json, requests
 
@@ -15,7 +15,7 @@ leagues_id_list = [39]  # ID các giải đấu , 140, 135, 78, 61
 season_list = [2024]
 
 #---------------------------------------------------------------------------------------------------------------
-def fetch_and_save_leagues(request):
+def fetch_and_save_leagues(request): #Just need to call 1 per season
     url = "https://api-football-v1.p.rapidapi.com/v3/leagues"
     
     response = requests.get(url, headers=headers)
@@ -50,7 +50,7 @@ def fetch_and_save_leagues(request):
 
 
 #---------------------------------------------------------------------------------------------------------------
-def fetch_and_save_standings(request):
+def fetch_and_save_standings(request): # Change the code on the Top to get more leagues (leagues_id_list, season_list)
     url = "https://api-football-v1.p.rapidapi.com/v3/standings"
 
     for league in leagues_id_list:
@@ -174,8 +174,9 @@ def fetch_and_save_team_info(team_id):
     else:
         print(f"Failed to fetch data : {response.status_code}")
 
+
 #---------------------------------------------------------------------------------------------------------------
-def fetch_and_save_teams_statistic(request):
+def fetch_and_save_teams_statistic(request):  # Client need add dropdown select season before fetch team data.
     season = 2024
     grouped_data = LeagueStanding.objects.filter(season=season).values('league_id').distinct()
 
@@ -409,7 +410,7 @@ def fetch_and_save_team_statistics_data(league_id, season, team_id):
 
 
 #---------------------------------------------------------------------------------------------------------------
-def fetch_and_save_matches(request):
+def fetch_and_save_matches(request):  # Client need add dropdown select season before fetch team data.
     season = 2024
     grouped_data = LeagueStanding.objects.filter(season=season).values('league_id').distinct()
 
@@ -440,17 +441,12 @@ def fetch_and_save_matches(request):
 
             # Trích xuất thông tin từ league
             league_id = league_data['id'] #league_id
-            league_name = league_data['name']
             country_name = league_data['country'] #country_name
             season = league_data['season'] #season
-            round = league_data['round'] #round
 
             # Trích xuất thông tin từ teams
             home_team_id = teams_data['home']['id'] #home
             away_team_id = teams_data['away']['id'] #away
-
-            home_team_name = teams_data['home']['name']
-            away_team_name = teams_data['away']['name']
 
             # Trích xuất thông tin từ score
             ht_score_data = score_data['halftime']
@@ -498,15 +494,86 @@ def fetch_and_save_matches(request):
                 }
             )
 
-            # Cập nhật hoặc tạo mới LeagueTeam cho cả đội nhà và đội khách
-            LeagueTeam.objects.update_or_create(
-                team_id=home_team_id,
-                defaults={
-                    'league_id': league_id_new.id,
-                    'league_name': league_name,
-                    'team_id': home_team_id,
-                    'team_name': home_team_name,
-                }
-            )
-
     return HttpResponse("Matches imported successfully.")
+
+
+#---------------------------------------------------------------------------------------------------------------
+def fetch_and_save_players(request):  # Client need add dropdown select season before fetch team data.
+    season = 2024
+    grouped_data = LeagueStanding.objects.filter(season=season).values('league_id').distinct()
+
+    # Duyệt qua từng mùa giải và giải đấu
+    for group in grouped_data:
+        league_id = group['league_id']
+        print(f"Processing league_id: {league_id}, season {season}")
+
+        url = "https://api-football-v1.p.rapidapi.com/v3/players"
+
+        all_players = []
+        current_page = 1
+
+        while True:
+            querystring = {"league": league_id, "season": season, "page": current_page}
+            response = requests.get(url, headers=headers, params=querystring)
+            data = response.json()
+
+            if 'response' not in data or not data['response']:
+                break
+
+            players_data = data['response']
+            all_players.extend(players_data)
+
+            for player_data in players_data:
+                player_info = player_data['player']
+                stats = player_data['statistics'][0]
+
+                # Save player information
+                player, created = Player.objects.update_or_create(
+                    api_id=player_info['id'],
+                    defaults={
+                        'api_id': player_info['id'],
+                        'name': player_info['name'],
+                        'first_name': player_info['firstname'],
+                        'last_name': player_info['lastname'],
+                        'date_of_birth': player_info['birth']['date'],
+                        'nationality': player_info['nationality'],
+                        'height': player_info['height'],
+                        'position': stats['games']['position'],
+                        'image': player_info['photo']
+                    }
+                )
+
+                # Get or create team and league
+                # team, _ = Team.objects.get_or_create(api_id=stats['team']['id'], defaults={'name': stats['team']['name']})
+                # league, _ = League.objects.get_or_create(api_id=stats['league']['id'], defaults={'name': stats['league']['name']})
+
+                # # Save player statistics
+                # PlayerSeasonStatistics.objects.update_or_create(
+                #     player=player,
+                #     team=team,
+                #     league=league,
+                #     season=season,
+                #     defaults={
+                #         'appearances': stats['games']['appearences'],
+                #         'minutes': stats['games']['minutes'],
+                #         'position': stats['games']['position'],
+                #         'rating': stats['games']['rating'],
+                #         'goals': stats['goals']['total'],
+                #         'assists': stats['goals']['assists'],
+                #         # Add other statistics as needed
+                #     }
+                # )
+            print(f"Page {current_page} of {data['paging']['total']} fetched successfully.")
+            if current_page == 2:
+                break
+
+            current_page += 1
+
+        print(f"League {league_id}, season {season}, total players fetched: {len(all_players)}")
+        # for player_data in all_players:
+        #     print(f"{player_data['player']['id']} & {player_data['player']['name']} & {player_data['player']['age']}")
+
+        # for player in all_players['response']:
+        #     fixture_data = match['fixture']
+
+    return HttpResponse("Team Statistics imported successfully.")

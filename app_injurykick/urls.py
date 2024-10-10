@@ -12,5 +12,6 @@ urlpatterns = [
     path('fetch-standings/', views.fetch_and_save_standings, name='fetch_and_save_standings'),
     path('fetch-teams/', views.fetch_and_save_teams, name='fetch_and_save_teams'),
     path('fetch-team-season-statistics/', views.fetch_and_save_teams_statistic, name='fetch_and_save_teams_statistic'),
+    path('fetch_and_save_players/', views.fetch_and_save_players, name='fetch_and_save_players'),
 
 ]

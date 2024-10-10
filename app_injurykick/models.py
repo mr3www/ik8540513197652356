@@ -192,18 +192,6 @@ class Match(models.Model):  #request("GET", "/v3/fixtures?league={39}&season={20
 
 
 #---------------------------------------------------------------------------------------------------------------
-class LeagueTeam(models.Model):
-    id = models.AutoField(primary_key=True)
-    league_id = models.PositiveIntegerField(unique=True)  # Đảm bảo rằng league_id là duy nhất
-    league_name = models.CharField(max_length=255)
-    team_id = models.PositiveIntegerField()
-    team_name = models.CharField(max_length=255)
-
-    def __str__(self):
-        return f"{self.league_name} - {self.team_name}"
-
-
-#---------------------------------------------------------------------------------------------------------------
 class Player(models.Model):  # request("GET", "/v3/players?id={276}&season={2020}", headers=headers)
     id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho id tự động tăng
     api_id = models.IntegerField(null=True, blank=True, db_index=True, unique=True)  # ID từ API-FOOTBALL
@@ -227,19 +215,6 @@ class Player(models.Model):  # request("GET", "/v3/players?id={276}&season={2020
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
-
-
-#---------------------------------------------------------------------------------------------------------------
-class PlayerTeam(models.Model):  # Crawling Data From Transfermarkt
-    id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho id tự động tăng
-    api_id = models.IntegerField(null=True, blank=True, db_index=True, unique=True)  # Thêm api_id nếu cần
-    player = models.ForeignKey(Player, on_delete=models.CASCADE)
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    joined = models.DateField()
-    left = models.DateField(null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.player.full_name()} - {self.team.name}"
 
 
 #---------------------------------------------------------------------------------------------------------------

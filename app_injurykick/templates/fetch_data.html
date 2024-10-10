@@ -33,6 +33,11 @@
         {% csrf_token %}
         <button type="submit">Fetch & Save Matches</button>
     </form>
+    <br>
+    <form action="{% url 'fetch_and_save_players' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Fetch & Save Players</button>
+    </form>
     {% else %}
     You not allowed to see this content
     {% endif %}

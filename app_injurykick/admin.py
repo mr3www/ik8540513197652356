@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import League, Team, Match, LeagueTeam, LeagueStanding
+from .models import League, Team, Match, LeagueStanding
 from django.http import HttpResponse
 import http.client, json
 
