@@ -1,7 +1,43 @@
 {
-  "2020": {
-    "39": ["33", "34", "35"],
-    "40": ["36", "37", "38"],
-    "41": ["39", "40", "41"]
-  }
+  "result": [
+    {
+      "id": 82640,
+      "title": "Villarreal vs Atletico Madrid: Preview and Prediction",
+      "image": "https://people-api.pro/uploads/31-03-2024/907b1c1067c7d9a6ccf0359156438074.jpg",
+      "alias": "2024-03-31-villarreal-vs-atletico-madrid-preview-and-prediction",
+      "original_url": "https://thehardtackle.com/round-up/2024/03/31/villarreal-vs-atletico-madrid-preview-and-prediction/",
+      "lang": "en",
+      "published_at": "31-03-2024 23:39:00",
+      "categories": [
+        4
+      ],
+      "leagues": [],
+      "teams": [
+        845
+      ],
+      "countries": []
+    },
+    {
+      "id": 82633,
+      "title": "Leeds United vs Hull City: Preview and Prediction",
+      "image": "https://people-api.pro/uploads/31-03-2024/bf024551932cc0e4fa268e79507e77e0.jpg",
+      "alias": "2024-03-31-leeds-united-vs-hull-city-preview-and-prediction",
+      "original_url": "https://thehardtackle.com/round-up/2024/03/31/leeds-united-vs-hull-city-preview-and-prediction/",
+      "lang": "en",
+      "published_at": "31-03-2024 23:23:00",
+      "categories": [
+        4
+      ],
+      "leagues": [
+        26
+      ],
+      "teams": [
+        1165,
+        3623
+      ],
+      "countries": [
+        9
+      ]
+    }
+  ]
 }

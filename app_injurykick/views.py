@@ -598,6 +598,18 @@ def fetch_and_save_players(request):  # Client need add dropdown select season b
                     player_info = player_data['player']
                     stats = player_data['statistics'][0]
 
+                     # Xác định position_transformed dựa trên position
+                    position = stats['games']['position']
+                    position_transformed = ''
+                    if position == 'Attacker':
+                        position_transformed = 'FW'
+                    elif position == 'Defender':
+                        position_transformed = 'DF'
+                    elif position == 'Midfielder':
+                        position_transformed = 'MF'
+                    elif position == 'Goalkeeper':
+                        position_transformed = 'GK'
+
                     # Save player information
                     player, created = Player.objects.update_or_create(
                         api_id=player_info['id'],
@@ -610,6 +622,7 @@ def fetch_and_save_players(request):  # Client need add dropdown select season b
                             'nationality': player_info['nationality'],
                             'height': player_info['height'],
                             'position': stats['games']['position'],
+                            'position_transformed': position_transformed,
                             'image': player_info['photo']
                         }
                     )
@@ -636,6 +649,7 @@ def fetch_and_save_players(request):  # Client need add dropdown select season b
                             'captain': stats['games'].get('captain', False),  # Đặt mặc định False cho captain nếu không có dữ liệu
                             'rating': stats['games'].get('rating', None),  # Rating có thể là None
                             'position': stats['games'].get('position', ''),
+                            'position_transformed': position_transformed,
                             'shots_on': stats['shots'].get('on', 0),
                             'shots_total': stats['shots'].get('total', 0),
                             'goals': stats['goals'].get('total', 0),
@@ -758,75 +772,108 @@ def scrape_team_link(request):
                         )
         return HttpResponse(f"Transfermarkt Team Link Data crawling & saved successfully.")
 
-def scrape_team_details(team_link, team_name, league_name):
-    print(f"Đang xử lý đội bóng: {team_name} ({league_name})")
-    response = requests.get(team_link, headers=headers)
-    
-    # Kiểm tra xem truy cập thành công không
-    if response.status_code != 200:
-        print(f"Không thể truy cập {team_link}, bỏ qua...")
-        return []
+def scrape_team_details(request):
+    # Lấy tất cả các đội bóng từ LeagueTeamLinkTransfermarktData
+    teams = LeagueTeamLinkTransfermarktData.objects.all()
 
-    soup = BeautifulSoup(response.content, 'html.parser')
-    
-    # Tìm bảng dữ liệu cầu thủ
-    table = soup.find('table', class_='items')
-    
-    # Nếu không tìm thấy bảng thì trả về danh sách rỗng
-    if table is None:
-        print(f"Không tìm thấy bảng dữ liệu tại {team_link}, bỏ qua...")
-        return []
+    base_url = "https://www.transfermarkt.com"
 
-    players_data = []
-
-    # Duyệt qua các hàng trong bảng dữ liệu
-    for row in table.find('tbody').find_all('tr', class_=['odd', 'even']):
-        player = row.find('td', class_='hauptlink').find('a').text.strip()  # Lấy tên cầu thủ
-        player_pos = row.find('table', class_='inline-table').find_all('tr')[1].text.strip()  # Lấy vị trí cầu thủ
+    position_mapping = {
+        'Goalkeeper': 'GK',
+        'Sweeper': 'DF',
+        'Centre-Back': 'DF',
+        'Left-Back': 'DF',
+        'Right-Back': 'DF',
+        'Central Midfield': 'MF',
+        'Left Midfield': 'MF',
+        'Right Midfield': 'MF',
+        'Defensive Midfield': 'MF',
+        'Attacking Midfield': 'MF',
+        'Left Winger': 'FW',
+        'Right Winger': 'FW',
+        'Centre-Forward': 'FW',
+        'Second Striker': 'FW',
+    }
+    
+    for team in teams:
+        print(f"Đang xử lý đội bóng: {team.team} tại {team.link}...")
+        PlayerTransfermarktData.objects.filter(team=team.team).delete()
+        response = requests.get(team.link, headers=headers_scrape_transfermarkt)
         
-        player_number = row.find('div', class_='rn_nummer').text.strip() if row.find('div', class_='rn_nummer') else None
+        if response.status_code != 200:
+            print(f"Không thể truy cập {team.link}, bỏ qua...")
+            continue
+
+        soup = BeautifulSoup(response.content, 'html.parser')
         
-        if player_number == "-":
-            player_number = None  # Nếu số áo là "-", gán giá trị None
-        elif not player_number.isdigit():  # Nếu không phải là số, gán giá trị None
-            player_number = None
+        # Tìm bảng dữ liệu cầu thủ
+        table = soup.find('table', class_='items')
+        
+        if table is None:
+            print(f"Không tìm thấy bảng dữ liệu tại {team.link}, bỏ qua...")
+            continue
+
+        for row in table.find('tbody').find_all('tr', class_=['odd', 'even']):
+            player = row.find('td', class_='hauptlink').find('a').text.strip()  # Tên cầu thủ
+            player_link = row.find('td', class_='hauptlink').find('a')['href']
+            player_pos = row.find('table', class_='inline-table').find_all('tr')[1].text.strip()  # Vị trí cầu thủ
+            player_number = row.find('div', class_='rn_nummer').text.strip() if row.find('div', class_='rn_nummer') else None
             
-        market_value = row.find('td', class_='rechts').text.strip()  # Lấy giá trị cầu thủ
+            player_pos_converted = position_mapping.get(player_pos, 'Unknown')
+            full_player_link = base_url + player_link
+            player_id = player_link.split('/')[-1]
 
-        # Hàm chuyển đổi giá trị thị trường
-        def convert_market_value(value):
-            if value == '-':
-                return 0
-            value = value.replace('€', '')  # Loại bỏ ký hiệu €
-            if value[-1] == 'm':
-                return float(value[:-1]) * 1_000_000  # Chuyển đổi từ triệu sang số nguyên
-            elif value[-1] == 'k':
-                return float(value[:-1]) * 1_000  # Chuyển đổi từ nghìn sang số nguyên
+            if player_number == "-":
+                player_number = None  # Nếu số áo là "-", gán giá trị None
+            elif not player_number.isdigit():  # Nếu không phải là số, gán giá trị None
+                player_number = None
+
+            market_value = row.find('td', class_='rechts').text.strip()  # Giá trị cầu thủ
+            
+            def convert_market_value(value):
+                if value == '-':
+                    return 0
+                value = value.replace('€', '')
+                if value[-1] == 'm':
+                    return float(value[:-1]) * 1_000_000
+                elif value[-1] == 'k':
+                    return float(value[:-1]) * 1_000
+                else:
+                    return float(value)
+                
+            market_value_transformed = convert_market_value(market_value)
+            market_value_cleaned = market_value.replace('€', '')
+
+            # Tìm hình ảnh cầu thủ
+            player_image_tag = row.find('img', class_='bilderrahmen-fixed')
+            player_image = player_image_tag['data-src'] if player_image_tag else None
+            if player_image:
+                player_image = player_image.replace('medium', 'header')
             else:
-                return float(value)  # Trường hợp không có 'm' hoặc 'k', giả sử là số trực tiếp
+                player_image = None
+
+            # Lưu cầu thủ vào cơ sở dữ liệu
+            player_data, created = PlayerTransfermarktData.objects.update_or_create(
+                name=player,
+                team=team.team,
+                league=team.league,
+                position=player_pos,
+                season=team.season,
+                trfmt_player_id=player_id,
+                defaults={
+                    'number': player_number,
+                    'market_value': market_value_transformed,
+                    'market_value_cleaned': market_value_cleaned,
+                    'market_value_transformed': market_value_transformed,
+                    'image': player_image,
+                    'position_transformed':  player_pos_converted,
+                    'player_link': full_player_link,
+                }
+            )
             
-        market_value_transformed = convert_market_value(market_value)
-        market_value_cleaned = market_value.replace('€', '')
-
-        # Tìm hình ảnh cầu thủ
-        player_image_tag = row.find('img', class_='bilderrahmen-fixed')
-        player_image = player_image_tag['data-src'] if player_image_tag else None
-        
-        # Lưu cầu thủ vào cơ sở dữ liệu
-        player_data, created = PlayerTransfermarktData.objects.update_or_create(
-            name=player,
-            team=team_name,
-            league=league_name,
-            position=player_pos,
-            defaults={
-                'number': player_number,
-                'market_value': market_value_transformed,
-                'market_value_cleaned': market_value_cleaned,
-                'market_value_transformed': market_value_transformed,
-                'image': player_image
-            }
-        )
-
+        print(f"Đã hoàn thành việc lưu dữ liệu cầu thủ cho đội bóng: {team.team}")
+        time.sleep(2)
+    return HttpResponse(f"Players detail from transfermarkt already crawling done and saved successfully.")
 
 
 
@@ -834,7 +881,7 @@ def scrape_team_details(team_link, team_name, league_name):
 
 
 #---------------------------------------------------------------------------------------------------------------
-def update_legend_colors(request):
+def update_legend_colors(request): #FOR STANDINGS TABLE DESCRIPTION
     # Định nghĩa màu sắc tương ứng với thứ tự
     color_map = {
         1: "#28a745",  # Màu cho thứ tự đầu tiên (Xanh lá)
@@ -891,3 +938,47 @@ def update_legend_colors(request):
             standing.save()  # Lưu lại thay đổi
 
     return HttpResponse("Update Done")
+
+def update_position_transformed(request): #FOR PLAYER TRANSFERMARKT POSITION CONVERT
+
+    position_mapping = {
+        'Goalkeeper': 'GK',
+        'Sweeper': 'DF',
+        'Centre-Back': 'DF',
+        'Left-Back': 'DF',
+        'Right-Back': 'DF',
+        'Central Midfield': 'MF',
+        'Left Midfield': 'MF',
+        'Right Midfield': 'MF',
+        'Defensive Midfield': 'MF',
+        'Attacking Midfield': 'MF',
+        'Left Winger': 'FW',
+        'Right Winger': 'FW',
+        'Centre-Forward': 'FW',
+        'Second Striker': 'FW',
+    }
+
+    players = PlayerTransfermarktData.objects.all()
+    
+    for player in players:
+        # Kiểm tra vị trí gốc trong cột position
+        original_position = player.position
+        
+        # Chuyển đổi vị trí dựa trên từ điển position_mapping
+        transformed_position = position_mapping.get(original_position, 'Unknown')  # Nếu không tìm thấy vị trí, trả về 'Unknown'
+        
+        # Cập nhật cột position_transformed
+        player.position_transformed = transformed_position
+        
+        # Lưu lại thay đổi
+        player.save()
+
+    return HttpResponse(f"Players position from transfermarkt already transformed and saved successfully.")
+    
+def convert_date(date_string):
+    try:
+        # Parse the date in 'MMM DD, YYYY' format and convert to 'YYYY-MM-DD'
+        return datetime.strptime(date_string, '%b %d, %Y').strftime('%Y-%m-%d')
+    except ValueError:
+        return None  # Return None if the date format is invalid
+#----
