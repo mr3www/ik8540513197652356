@@ -20,11 +20,17 @@ class League(models.Model):  # request("GET", "/v3/leagues", headers=headers)
     id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho id tự động tăng
     api_id = models.IntegerField(null=True, blank=True, db_index=True, unique=True)  # ID từ API-FOOTBALL
     name = models.CharField(max_length=255, db_index=True)
+    name_custom = models.CharField(max_length=255, null=True, blank=True)
     type = models.CharField(max_length=50)  # Type ('League' or 'Cup')
+    type_custom = models.CharField(max_length=50, null=True, blank=True)
     image = models.URLField(blank=True, null=True)
+    image_custom = models.URLField(blank=True, null=True)
     country = models.CharField(max_length=255, null=True)
-    country_code = models.CharField(max_length=10, null=True)
+    country_custom = models.CharField(max_length=255, null=True, blank=True)
+    country_code = models.CharField(max_length=10, null=True, blank=True)
+    country_code_custom = models.CharField(max_length=10, null=True, blank=True)
     country_flag = models.URLField(blank=True, null=True)
+    country_flag_custom = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -42,12 +48,29 @@ class LeagueStanding(models.Model):
     logo = models.URLField()
     points = models.IntegerField()
     goals_diff = models.IntegerField()
-    played = models.IntegerField()
-    win = models.IntegerField()
-    draw = models.IntegerField()
-    lose = models.IntegerField()
-    goals_for = models.IntegerField()
-    goals_against = models.IntegerField()
+    played = models.IntegerField(null=True, blank=True)
+    win = models.IntegerField(null=True, blank=True)
+    draw = models.IntegerField(null=True, blank=True)
+    lose = models.IntegerField(null=True, blank=True)
+    goals_for = models.IntegerField(null=True, blank=True)
+    goals_against = models.IntegerField(null=True, blank=True)
+    home_played = models.IntegerField(null=True, blank=True)
+    home_win = models.IntegerField(null=True, blank=True)
+    home_draw = models.IntegerField(null=True, blank=True)
+    home_lose = models.IntegerField(null=True, blank=True)
+    home_goals_for = models.IntegerField(null=True, blank=True)
+    home_goals_against = models.IntegerField(null=True, blank=True)
+    away_played = models.IntegerField(null=True, blank=True)
+    away_win = models.IntegerField(null=True, blank=True)
+    away_draw = models.IntegerField(null=True, blank=True)
+    away_lose = models.IntegerField(null=True, blank=True)
+    away_goals_for = models.IntegerField(null=True, blank=True)
+    away_goals_against = models.IntegerField(null=True, blank=True)    
+    description = models.CharField(max_length=255, null=True, blank=True)
+    description_custom = models.CharField(max_length=255, null=True, blank=True)
+    description_deduction = models.CharField(max_length=255, null=True, blank=True)
+    legend_color = models.CharField(max_length=50, null=True, blank=True)  # Cột màu sắc
+    legend_color_custom = models.CharField(max_length=55, null=True, blank=True)
     update_time = models.DateTimeField()
 
     class Meta:
@@ -63,6 +86,7 @@ class Team(models.Model):  # request("GET", "/v3/teams?id={33}", headers=headers
     country = models.CharField(max_length=255)
     founded = models.IntegerField(null=True, blank=True)
     image = models.URLField(blank=True, null=True)
+    image_custom = models.URLField(blank=True, null=True)
     venue_id = models.IntegerField(null=True, blank=True, db_index=True, unique=True)
     venue_name = models.CharField(max_length=255)
     venue_address = models.CharField(max_length=255, blank=True, null=True)
@@ -80,7 +104,7 @@ class TeamSeasonStatistics(models.Model):  #request("GET", "/v3/teams/statistics
     id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho ID
     team = models.ForeignKey('Team', to_field='api_id', on_delete=models.CASCADE, related_name='season_statistics')
     league = models.ForeignKey('League', to_field='api_id', on_delete=models.CASCADE, related_name='season_statistics')
-    
+    season = models.IntegerField(null=True, blank=True)
     # Các thống kê lớn
     biggest_goals_home = models.IntegerField(default=0)
     biggest_goals_away = models.IntegerField(default=0)
@@ -203,19 +227,14 @@ class Player(models.Model):  # request("GET", "/v3/players?id={276}&season={2020
     height = models.CharField(max_length=10, blank=True, null=True)  # e.g., "1.80m"
     position = models.CharField(max_length=50)
     image = models.URLField(blank=True, null=True)
-    slug = models.SlugField(max_length=255, unique=True, blank=True)  # Thêm slug cho URL thân thiện
+    image_custom = models.URLField(blank=True, null=True)
 
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
 
     def __str__(self):
         return f"{self.name}"
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
-
+    
 
 #---------------------------------------------------------------------------------------------------------------
 class Injury(models.Model):  # Crawling Data From Soccerway or Transfermarkt
@@ -235,60 +254,62 @@ class Injury(models.Model):  # Crawling Data From Soccerway or Transfermarkt
 #---------------------------------------------------------------------------------------------------------------
 class PlayerSeasonStatistics(models.Model):    #request("GET", "/v3/players?league={39}&season={2020}", headers=headers)
     id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho ID
-    api_id = models.IntegerField(unique=True)  # Thêm trường api_id để lưu ID từ API
+    api_id = models.IntegerField()  # Thêm trường api_id để lưu ID từ API
     player = models.ForeignKey('Player', to_field='api_id', related_name='season_statistics' ,on_delete=models.CASCADE)
     team = models.ForeignKey('Team', to_field='api_id', related_name='player_statistics' ,on_delete=models.CASCADE)
     league = models.ForeignKey('League', to_field='api_id', related_name='player_statistics' ,on_delete=models.CASCADE)
-    
-    appearances = models.IntegerField(default=0)
-    starting = models.IntegerField(default=0)
-    subs_in = models.IntegerField(default=0)
-    subs_out = models.IntegerField(default=0)
-    bench = models.IntegerField(default=0)
-    minutes = models.IntegerField(default=0)
-    captain = models.BooleanField(default=False)
+    season = models.IntegerField(null=True, blank=True)
+
+    appearances = models.IntegerField(default=0, null=True, blank=True)
+    starting = models.IntegerField(default=0, null=True, blank=True)
+    subs_in = models.IntegerField(default=0, null=True, blank=True)
+    subs_out = models.IntegerField(default=0, null=True, blank=True)
+    bench = models.IntegerField(default=0, null=True, blank=True)
+    minutes = models.IntegerField(default=0, null=True, blank=True)
+    captain = models.BooleanField(default=False, null=True, blank=True)
     rating = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)  # Điểm trên thang 10
-    
+    position = models.CharField(max_length=50, null=True, blank=True)
+
     # Thống kê tấn công
-    shots_on = models.IntegerField(default=0)
-    shots_total = models.IntegerField(default=0)
-    goals = models.IntegerField(default=0)
-    conceded = models.IntegerField(default=0)
-    assists = models.IntegerField(default=0)
-    saves = models.IntegerField(default=0)
+    shots_on = models.IntegerField(default=0, null=True, blank=True)
+    shots_total = models.IntegerField(default=0, null=True, blank=True)
+    goals = models.IntegerField(default=0, null=True, blank=True)
+    conceded = models.IntegerField(default=0, null=True, blank=True)
+    assists = models.IntegerField(default=0, null=True, blank=True)
+    saves = models.IntegerField(default=0, null=True, blank=True)
     
     # Thống kê chuyền bóng
-    passes_total = models.IntegerField(default=0)
-    passes_key = models.IntegerField(default=0)
+    passes_total = models.IntegerField(default=0, null=True, blank=True)
+    passes_key = models.IntegerField(default=0, null=True, blank=True)
     passes_accuracy = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # Tỷ lệ chính xác
     
     # Thống kê phòng ngự
-    tackles_total = models.IntegerField(default=0)
-    blocks = models.IntegerField(default=0)
-    interceptions = models.IntegerField(default=0)
+    tackles_total = models.IntegerField(default=0, null=True, blank=True)
+    blocks = models.IntegerField(default=0, null=True, blank=True)
+    interceptions = models.IntegerField(default=0, null=True, blank=True)
     
     # Thống kê tranh chấp và đi bóng
-    duels_total = models.IntegerField(default=0)
-    duels_won = models.IntegerField(default=0)
-    dribbles_attempts = models.IntegerField(default=0)
-    dribbles_success = models.IntegerField(default=0)
-    dribbles_past = models.IntegerField(default=0)
+    duels_total = models.IntegerField(default=0, null=True, blank=True)
+    duels_won = models.IntegerField(default=0, null=True, blank=True)
+    dribbles_attempts = models.IntegerField(default=0, null=True, blank=True)
+    dribbles_success = models.IntegerField(default=0, null=True, blank=True)
+    dribbles_past = models.IntegerField(default=0, null=True, blank=True)
     
     # Thống kê phạm lỗi
-    fouls_drawn = models.IntegerField(default=0)
-    fouls_committed = models.IntegerField(default=0)
+    fouls_drawn = models.IntegerField(default=0, null=True, blank=True)
+    fouls_committed = models.IntegerField(default=0, null=True, blank=True)
     
     # Thống kê thẻ phạt
-    yellow_card = models.IntegerField(default=0)
-    yellowred_card = models.IntegerField(default=0)
-    red_card = models.IntegerField(default=0)
+    yellow_card = models.IntegerField(default=0, null=True, blank=True)
+    yellowred_card = models.IntegerField(default=0, null=True, blank=True)
+    red_card = models.IntegerField(default=0, null=True, blank=True)
     
     # Thống kê phạt đền
-    penalty_won = models.IntegerField(default=0)
-    penalty_committed = models.IntegerField(default=0)
-    penalty_scored = models.IntegerField(default=0)
-    penalty_missed = models.IntegerField(default=0)
-    penalty_saved = models.IntegerField(default=0)
+    penalty_won = models.IntegerField(default=0, null=True, blank=True)
+    penalty_committed = models.IntegerField(default=0, null=True, blank=True)
+    penalty_scored = models.IntegerField(default=0, null=True, blank=True)
+    penalty_missed = models.IntegerField(default=0, null=True, blank=True)
+    penalty_saved = models.IntegerField(default=0, null=True, blank=True)
 
     def __str__(self):
         return f'{self.player.name} - {self.team.name} ({self.id})'
@@ -329,10 +350,38 @@ class News(models.Model):  # request("GET", "/api/news-by-date?date=2024-01-01&l
     image_url = models.URLField(max_length=200, null=True, blank=True)  # URL hình ảnh
     original_url = models.URLField(max_length=200)  # URL gốc của tin tức
     published_at = models.DateTimeField()  # Ngày giờ phát hành
-    slug = models.SlugField(max_length=255, unique=True)  # Slug cho tin tức
-
+    categories = models.IntegerField(null=True, blank=True) # Trả về ID của categories theo từng loại.
+    
+    #Categories # 3 = "Transfers", # 4 = "General", # 5 = "Match Previews", # 6 = "Featured", # 7 = "Internationals"
     def __str__(self):
         return self.title
 
 
 #---------------------------------------------------------------------------------------------------------------
+class LeagueTeamLinkTransfermarktData(models.Model):
+    id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho id tự động tăng
+    league = models.CharField(max_length=255, null=True, blank=True)
+    season = models.IntegerField(null=True, blank=True)
+    team = models.CharField(max_length=255, null=True, blank=True)
+    link = models.URLField(null=True, blank=True)
+    image = models.URLField(null=True, blank=True)
+    trfmt_team_id = models.IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.league} {self.team} {self.link}"
+
+#---------------------------------------------------------------------------------------------------------------
+class PlayerTransfermarktData(models.Model):  # request("GET", "/v3/players?id={276}&season={2020}", headers=headers)
+    id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho id tự động tăng
+    league = models.CharField(max_length=255, null=True, blank=True)
+    name = models.CharField(max_length=255, db_index=True)
+    team = models.CharField(max_length=255, null=True, blank=True)
+    position = models.CharField(max_length=100, null=True, blank=True)
+    number = models.CharField(max_length=10, null=True, blank=True)
+    market_value = models.DecimalField(max_digits=15, decimal_places=2)
+    market_value_cleaned = models.CharField(max_length=255)
+    market_value_transformed = models.CharField(max_length=255)
+    image = models.URLField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.name}"

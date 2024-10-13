@@ -38,6 +38,22 @@
         {% csrf_token %}
         <button type="submit">Fetch & Save Players</button>
     </form>
+    <br>
+    <form action="{% url 'fetch_and_save_news' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Fetch & Save News</button>
+    </form>
+    <hr>
+    <h1>Function Add On</h1>
+    <form action="{% url 'update_legend_colors' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Update Legend Color for League Standings</button>
+    </form>
+    <br>
+    <form action="{% url 'scrape_team_link' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Scrape Team Link from Transfermarkt</button>
+    </form>
     {% else %}
     You not allowed to see this content
     {% endif %}
