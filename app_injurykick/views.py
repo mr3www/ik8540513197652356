@@ -695,39 +695,35 @@ def fetch_and_save_players(request):  # Client need add dropdown select season b
 
 
 #---------------------------------------------------------------------------------------------------------------
-def fetch_and_save_news(request): #Limit 10/day
+def fetch_and_save_news(request):  # Limit 10/day
     today = datetime.today().strftime('%Y-%m-%d')
-    url = "https://football-news11.p.rapidapi.com/api/news-by-date"
     yesterday = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
 
-    querystring_news = {"date": "2024-10-12", "lang": "en", "page": "1"}
+    url = "https://football-news11.p.rapidapi.com/api/news-by-date"
+    querystring_news = {"date": today, "lang": "en", "page": "1"}
 
-    response = requests.get(url, headers=headers_news, params=querystring_news)
-    data = response.json()
+    try:
+        response = requests.get(url, headers=headers_news, params=querystring_news)
+        response.raise_for_status()  # Raises an exception for 4xx/5xx status codes
+        data = response.json()
 
-    if not data['result']:
-        print("No news data returned from the API.")
-        return HttpResponse("No news data returned from the API.")
+        for item in data.get('result', []):
+            # Create or update News record
+            news, created = News.objects.update_or_create(
+                api_id=item['id'],
+                defaults={
+                    'title': item['title'],
+                    'image_url': item.get('image', None),
+                    'original_url': item['original_url'],
+                    'published_at': datetime.strptime(item['published_at'], '%d-%m-%Y %H:%M:%S'),
+                }
+            )
 
-    for item in data['result']:
-        # Kiểm tra nếu 'categories' tồn tại và không rỗng
-        if not item.get('categories', []):
-            print("News from date not exist, please try again once API updated!")
-            return HttpResponse("News from date not exist, please try again once API updated!")
-
-        # Tạo hoặc cập nhật bản ghi News
-        news, created = News.objects.update_or_create(
-            api_id=item['id'],
-            defaults={
-                'title': item['title'],
-                'image_url': item.get('image', None),
-                'original_url': item['original_url'],
-                'categories': item['categories'][0],
-                'published_at': datetime.strptime(item['published_at'], '%d-%m-%Y %H:%M:%S'),
-            }
-        )
-
-    return HttpResponse(f"News data of {yesterday} fetched and saved successfully.")
+        return HttpResponse(f"News data of {yesterday} fetched and saved successfully.")
+    
+    except requests.exceptions.RequestException as e:
+        # Log error and return an error response
+        return HttpResponse(f"Failed to fetch news data: {str(e)}", status=500)
 
 
 #---------------------------------------------------------------------------------------------------------------

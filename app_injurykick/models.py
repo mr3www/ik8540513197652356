@@ -338,7 +338,6 @@ class News(models.Model):  # request("GET", "/api/news-by-date?date=2024-01-01&l
     image_url = models.URLField(max_length=200, null=True, blank=True)  # URL hình ảnh
     original_url = models.URLField(max_length=200)  # URL gốc của tin tức
     published_at = models.DateTimeField()  # Ngày giờ phát hành
-    categories = models.IntegerField(null=True, blank=True) # Trả về ID của categories theo từng loại.
     
     #Categories # 3 = "Transfers", # 4 = "General", # 5 = "Match Previews", # 6 = "Featured", # 7 = "Internationals"
     def __str__(self):
@@ -346,6 +345,22 @@ class News(models.Model):  # request("GET", "/api/news-by-date?date=2024-01-01&l
 
 
 #---------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#---------------------------------------------------------------------------------------------------------------
+
 class LeagueTeamLinkTransfermarktData(models.Model):
     id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho id tự động tăng
     league = models.CharField(max_length=255, null=True, blank=True)
@@ -358,8 +373,6 @@ class LeagueTeamLinkTransfermarktData(models.Model):
     def __str__(self):
         return f"{self.league} {self.team} {self.link}"
 
-
-#---------------------------------------------------------------------------------------------------------------
 class PlayerTransfermarktData(models.Model):  # request("GET", "/v3/players?id={276}&season={2020}", headers=headers)
     id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho id tự động tăng
     league = models.CharField(max_length=255, null=True, blank=True)
@@ -379,8 +392,6 @@ class PlayerTransfermarktData(models.Model):  # request("GET", "/v3/players?id={
     def __str__(self):
         return f"{self.name}"
 
-
-#---------------------------------------------------------------------------------------------------------------
 class Injury(models.Model):  # Crawling Data From Soccerway or Transfermarkt
     id = models.AutoField(primary_key=True)  # Auto-incrementing ID
     league = models.CharField(max_length=255, null=True, blank=True)  # ForeignKey to League model
@@ -395,8 +406,6 @@ class Injury(models.Model):  # Crawling Data From Soccerway or Transfermarkt
     def __str__(self):
         return f"Injury: {self.player} ({self.injury_type}) - {self.since}"
 
-
-#---------------------------------------------------------------------------------------------------------------
 class TeamMapping(models.Model):
     team_api = models.ForeignKey(Team, to_field='api_id', related_name='team_mapping', on_delete=models.CASCADE)  # Liên kết với model Team
     team_transfermarkt = models.ForeignKey(LeagueTeamLinkTransfermarktData, to_field='trfmt_team_id', related_name='team_mapping', on_delete=models.CASCADE)  # Liên kết với model LeagueTeamLinkTransfermarktData
@@ -410,6 +419,5 @@ class PlayerMapping(models.Model):
 
     def __str__(self):
         return f"{self.player_api.name} <-> {self.player_transfermarkt.name}"
-
 
 #---------------------------------------------------------------------------------------------------------------

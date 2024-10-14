@@ -59,11 +59,6 @@
         {% csrf_token %}
         <button type="submit">Scrape Team Detail from Transfermarkt</button>
     </form>
-    <br>
-    <form action="{% url 'scrape_injury_suspension_data' %}" method="post">
-        {% csrf_token %}
-        <button type="submit">Scrape Injury & Suspension data from Transfermarkt</button>
-    </form>
     <hr>
     <h1>FUNCTION TO UPDATE</h1>
     <form action="{% url 'update_legend_colors' %}" method="post">
