@@ -22,6 +22,14 @@ headers_scrape_transfermarkt = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
     }
 
+headers_scrape_soccerway = {
+    "Referer": "https://int.soccerway.com/",
+    "sec-ch-ua": '"Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"Windows"',
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+}
+
 leagues_id_list = [39]  # ID các giải đấu , 140, 135, 78, 61
 season_list = [2024]
 
@@ -35,10 +43,10 @@ url_league_map_transfermarkt = {
 
 url_league_sidelined = {
     'https://int.soccerway.com/national/england/premier-league/20242025/regular-season/r81780/sidelined/': 'England Premier League',
-    'https://int.soccerway.com/national/spain/primera-division/20242025/regular-season/r82318/sidelined/': 'Spain LaLiga',
-    'https://int.soccerway.com/national/italy/serie-a/20242025/regular-season/r82869/sidelined/': 'Italy Serie A',
-    'https://int.soccerway.com/national/germany/bundesliga/20242025/regular-season/r81840/sidelined/': 'Germany Bundesliga',
-    'https://int.soccerway.com/national/france/ligue-1/20242025/regular-season/r81802/sidelined/': 'France Ligue 1',
+    # 'https://int.soccerway.com/national/spain/primera-division/20242025/regular-season/r82318/sidelined/': 'Spain LaLiga',
+    # 'https://int.soccerway.com/national/italy/serie-a/20242025/regular-season/r82869/sidelined/': 'Italy Serie A',
+    # 'https://int.soccerway.com/national/germany/bundesliga/20242025/regular-season/r81840/sidelined/': 'Germany Bundesliga',
+    # 'https://int.soccerway.com/national/france/ligue-1/20242025/regular-season/r81802/sidelined/': 'France Ligue 1',
 }
 
 #---------------------------------------------------------------------------------------------------------------
@@ -816,12 +824,12 @@ def fetch_and_save_sidelined(request):
 
 
 #---------------------------------------------------------------------------------------------------------------
-def scrape_and_save_sidelined_players():
+def scrape_and_save_sidelined_players(request):
     crawled_data = []
     
     # Fetch data from all the league URLs
     for url, league_name in url_league_sidelined.items():
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers_scrape_soccerway)
         if response.status_code == 200:
             print(f"Truy cập thành công trang: {league_name}")
             soup = BeautifulSoup(response.content, 'html.parser')
@@ -858,6 +866,7 @@ def scrape_and_save_sidelined_players():
 
     # Update database with the crawled data
     crawl_data(crawled_data)
+    return HttpResponse("Success")
 
 def crawl_data(crawled_data):
     # Lấy danh sách các cầu thủ, đội, loại chấn thương và ngày bắt đầu từ dữ liệu đã crawl về

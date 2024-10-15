@@ -17,6 +17,7 @@ urlpatterns = [
 
     
     # CRAWLING DATA
+    path('scrape_and_save_sidelined_players/', views.scrape_and_save_sidelined_players, name='scrape_and_save_sidelined_players'),
     path('scrape_team_link/', views.scrape_team_link, name='scrape_team_link'),
     path('scrape_team_details/', views.scrape_team_details, name='scrape_team_details'),
 

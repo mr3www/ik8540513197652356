@@ -45,9 +45,9 @@
     </form>
     <hr>
     <h1>CRAWLING</h1>
-    <form action="{% url 'update_legend_colors' %}" method="post">
+    <form action="{% url 'scrape_and_save_sidelined_players' %}" method="post">
         {% csrf_token %}
-        <button type="submit">Update Legend Color for League Standings</button>
+        <button type="submit">Scrape Lastest Sidelined from Soccerway</button>
     </form>
     <br>
     <form action="{% url 'scrape_team_link' %}" method="post">
