@@ -331,23 +331,63 @@ class StandingDeduction(models.Model):  #Crawling Data to check if whether it ha
 
 #---------------------------------------------------------------------------------------------------------------
 #https://rapidapi.com/people-api-people-api-default/api/football-news11/playground/apiendpoint_7ba472f9-5c31-4342-a378-3fcfd45c7181
-class News(models.Model):  # request("GET", "/api/news-by-date?date=2024-01-01&lang=en&page=1", headers=headers)
+class Category(models.Model):
+    CATEGORY_CHOICES = [
+        (0, "General"),
+        (3, "Transfers"),
+        (4, "General"),
+        (5, "Match Previews"),
+        (6, "Featured"),
+        (7, "Internationals"),
+    ]
+    
+    id = models.IntegerField(primary_key=True, choices=CATEGORY_CHOICES)
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.get_id_display()
+
+class News(models.Model):
     id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho ID
-    api_id = models.IntegerField(unique=True)  # Thêm trường api_id để lưu ID từ API
+    api_id = models.IntegerField(null=True, blank=True)  # Thêm trường api_id để lưu ID từ API
     title = models.CharField(max_length=255)  # Tiêu đề tin tức
     image_url = models.URLField(max_length=200, null=True, blank=True)  # URL hình ảnh
     original_url = models.URLField(max_length=200)  # URL gốc của tin tức
     published_at = models.DateTimeField()  # Ngày giờ phát hành
-    
-    #Categories # 3 = "Transfers", # 4 = "General", # 5 = "Match Previews", # 6 = "Featured", # 7 = "Internationals"
+    categories = models.ManyToManyField(Category, blank=True, default=None)  # Liên kết với Category model
+
     def __str__(self):
         return self.title
 
 
 #---------------------------------------------------------------------------------------------------------------
+class Sidelined(models.Model):
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)  # Liên kết với model Player
+    type = models.CharField(max_length=255)  # Loại chấn thương hoặc lý do bị đình chỉ
+    start_date = models.DateField(null=True, blank=True)  # Ngày bắt đầu chấn thương/đình chỉ
+    end_date = models.DateField(null=True, blank=True)    # Ngày kết thúc chấn thương/đình chỉ
 
+    def __str__(self):
+        return f"{self.player.name} - {self.type} ({self.start_date} to {self.end_date})"
 
+class LastestSidelined(models.Model):
+    STATUS_CHOICES = [
+        ('injured', 'Injured'),
+        ('recovered', 'Recovered'),
+    ]
 
+    team_name = models.CharField(max_length=255)
+    player_name = models.CharField(max_length=255)
+    player_link = models.URLField()
+    injury_type = models.CharField(max_length=255, null=True, blank=True)
+    start_date = models.CharField(max_length=50, null=True, blank=True)
+    end_date = models.CharField(max_length=50, null=True, blank=True)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='injured')
+
+    def __str__(self):
+        return f"{self.player_name} ({self.team_name})"
+
+#---------------------------------------------------------------------------------------------------------------
 
 
 

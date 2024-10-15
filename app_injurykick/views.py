@@ -33,6 +33,14 @@ url_league_map_transfermarkt = {
         'https://www.transfermarkt.com/ligue-1/startseite/wettbewerb/FR1': 'France Ligue 1',
     }
 
+url_league_sidelined = {
+    'https://int.soccerway.com/national/england/premier-league/20242025/regular-season/r81780/sidelined/': 'England Premier League',
+    'https://int.soccerway.com/national/spain/primera-division/20242025/regular-season/r82318/sidelined/': 'Spain LaLiga',
+    'https://int.soccerway.com/national/italy/serie-a/20242025/regular-season/r82869/sidelined/': 'Italy Serie A',
+    'https://int.soccerway.com/national/germany/bundesliga/20242025/regular-season/r81840/sidelined/': 'Germany Bundesliga',
+    'https://int.soccerway.com/national/france/ligue-1/20242025/regular-season/r81802/sidelined/': 'France Ligue 1',
+}
+
 #---------------------------------------------------------------------------------------------------------------
 def fetch_and_save_leagues(request): #Just need to call 1 per season
     url = "https://api-football-v1.p.rapidapi.com/v3/leagues"
@@ -700,7 +708,7 @@ def fetch_and_save_news(request):  # Limit 10/day
     yesterday = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
 
     url = "https://football-news11.p.rapidapi.com/api/news-by-date"
-    querystring_news = {"date": today, "lang": "en", "page": "1"}
+    querystring_news = {"date": yesterday, "lang": "en", "page": "1"}
 
     try:
         response = requests.get(url, headers=headers_news, params=querystring_news)
@@ -719,12 +727,185 @@ def fetch_and_save_news(request):  # Limit 10/day
                 }
             )
 
+            category_ids = item.get('categories', [])
+            if category_ids:
+                categories = Category.objects.filter(id__in=category_ids)
+                news.categories.set(categories)
+            else:
+                unknown_category, _ = Category.objects.get_or_create(id=0, name="Unknown")
+                news.categories.set([unknown_category])
+
+            news.save()
+
         return HttpResponse(f"News data of {yesterday} fetched and saved successfully.")
     
     except requests.exceptions.RequestException as e:
         # Log error and return an error response
         return HttpResponse(f"Failed to fetch news data: {str(e)}", status=500)
 
+
+#---------------------------------------------------------------------------------------------------------------
+def fetch_and_save_sidelined(request):
+    # Lấy dữ liệu từ client
+    body_unicode = request.body.decode('utf-8')
+    body_data = json.loads(body_unicode)
+    
+    # Kiểm tra xem client yêu cầu scrape nửa đầu hay nửa sau
+    scrape_half = body_data.get('scrape_half', 'first')  # Mặc định là nửa đầu nếu không có giá trị
+
+    # Lấy danh sách tất cả các Player có api_id
+    players = Player.objects.filter(api_id__isnull=False)
+    total_players = players.count()
+    
+    # Chia player thành nửa đầu và nửa sau
+    half_point = total_players // 2
+    if scrape_half == 'first':
+        # Nửa đầu của danh sách players
+        players = players[:half_point]
+    else:
+        # Nửa sau của danh sách players
+        players = players[half_point:]
+    
+    # Giới hạn của API mỗi phút
+    limit_per_minute = 300
+    
+    # Tính số batch cần thiết
+    num_batches = (players.count() // limit_per_minute) + (1 if players.count() % limit_per_minute != 0 else 0)
+    
+    # Khởi tạo URL API và headers
+    url = "https://api-football-v1.p.rapidapi.com/v3/sidelined"
+
+    # Tạo danh sách để lưu trữ kết quả
+    results = []
+
+    # Thực hiện request theo batch
+    for batch in range(num_batches):
+        # Lấy nhóm player cho batch hiện tại
+        start_idx = batch * limit_per_minute
+        end_idx = start_idx + limit_per_minute
+        batch_players = players[start_idx:end_idx]
+        
+        # Gọi API cho từng Player trong batch
+        for player in batch_players:
+            querystring = {"player": str(player.api_id)}
+            response = requests.get(url, headers=headers, params=querystring)
+            data = response.json()
+
+            # Lưu kết quả vào danh sách
+            results.append({
+                'player': player.name,
+                'data': data.get('response', [])  # lấy thông tin về injury/sidelined
+            })
+
+            # Lưu thông tin sidelined vào database
+            for sidelined_info in data.get('response', []):
+                Sidelined.objects.create(
+                    player=player,
+                    type=sidelined_info.get('type', ''),
+                    start_date=sidelined_info.get('start'),
+                    end_date=sidelined_info.get('end')
+                )
+
+        # Nếu chưa phải batch cuối cùng, chờ 60 giây trước khi request batch tiếp theo
+        if batch < num_batches - 1:
+            print(f"Waiting for 60 seconds before next batch ({batch + 1}/{num_batches})...")
+            time.sleep(60)  # chờ 60 giây
+
+    # Trả kết quả về template hoặc JSON response
+    return HttpResponse('Succesfully fetch and saved!')
+
+
+#---------------------------------------------------------------------------------------------------------------
+def scrape_and_save_sidelined_players():
+    crawled_data = []
+    
+    # Fetch data from all the league URLs
+    for url, league_name in url_league_sidelined.items():
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            print(f"Truy cập thành công trang: {league_name}")
+            soup = BeautifulSoup(response.content, 'html.parser')
+            teams = soup.find_all('tr', class_='group-head')
+
+            for team in teams:
+                team_name = team.get_text(strip=True)
+                next_row = team.find_next_sibling('tr')
+                while next_row and 'sub-head' not in next_row['class']:
+                    next_row = next_row.find_next_sibling('tr')
+
+                while next_row and 'group-head' not in next_row['class']:
+                    cols = next_row.find_all('td')
+                    if cols:
+                        player_link = cols[0].find('a')['href']
+                        player_name = cols[0].get_text(strip=True)
+                        injury_type = cols[1]['title'] if len(cols) > 1 else None
+                        start_date = cols[2].get_text(strip=True)
+                        end_date = cols[3].get_text(strip=True)
+                        
+                        # Add player data to the list
+                        crawled_data.append({
+                            'player': player_name,
+                            'team': team_name,
+                            'player_link': player_link,
+                            'injury_type': injury_type,
+                            'start_date': start_date,
+                            'end_date': end_date,
+                            'league': league_name
+                        })
+                    next_row = next_row.find_next_sibling('tr')
+        else:
+            print(f"Không thể truy cập {url}, mã lỗi: {response.status_code}")
+
+    # Update database with the crawled data
+    crawl_data(crawled_data)
+
+def crawl_data(crawled_data):
+    # Lấy danh sách các cầu thủ, đội, loại chấn thương và ngày bắt đầu từ dữ liệu đã crawl về
+    crawled_entries = {(data['player'], data['team'], data['injury_type'], data['start_date']) for data in crawled_data}
+
+    # Lấy tất cả thông tin chấn thương hiện có trong cơ sở dữ liệu
+    existing_injuries = LastestSidelined.objects.all()
+
+    # Tạo tập hợp các mục (cầu thủ, đội, loại chấn thương, ngày bắt đầu) từ cơ sở dữ liệu
+    existing_entries = {(injury.player_name, injury.team_name, injury.injury_type, injury.start_date) for injury in existing_injuries}
+
+    # Cập nhật trạng thái cho những cầu thủ đã hồi phục (không còn xuất hiện trong dữ liệu mới)
+    for injury in existing_injuries:
+        if (injury.player_name, injury.team_name, injury.injury_type, injury.start_date) not in crawled_entries:
+            injury.status = 'recovered'
+            injury.save()
+
+    # Xử lý dữ liệu vừa crawled
+    for data in crawled_data:
+        player_name = data['player']
+        team_name = data['team']
+        injury_type = data['injury_type']
+        start_date = data['start_date']
+        end_date = data['end_date']
+
+        # Kiểm tra xem chấn thương này đã tồn tại hay chưa bằng cách kiểm tra đồng thời cả cầu thủ, đội, loại chấn thương và ngày bắt đầu
+        if (player_name, team_name, injury_type, start_date) in existing_entries:
+            # Nếu chấn thương này đã tồn tại, cập nhật thông tin mới nhất
+            injury = LastestSidelined.objects.get(
+                player_name=player_name,
+                team_name=team_name,
+                injury_type=injury_type,
+                start_date=start_date
+            )
+            injury.end_date = end_date
+            injury.status = 'injured'  # Đặt trạng thái là 'injured'
+            injury.save()
+        else:
+            # Nếu đây là một chấn thương mới, thêm vào cơ sở dữ liệu
+            LastestSidelined.objects.create(
+                player_name=player_name,
+                team_name=team_name,
+                player_link=data['player_link'],
+                injury_type=injury_type,
+                start_date=start_date,
+                end_date=end_date,
+                status='injured'  # Đặt trạng thái là 'injured'
+            )
 
 #---------------------------------------------------------------------------------------------------------------
 def scrape_team_link(request):
