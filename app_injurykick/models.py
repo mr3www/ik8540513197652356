@@ -8,6 +8,7 @@ class Country(models.Model): # request("GET", "/v3/fixtures?league=39&season=202
     country_code = models.CharField(max_length=2, unique=True)  # Mã quốc gia, ví dụ "AL"
     country_name = models.CharField(max_length=255)  # Tên quốc gia, ví dụ "Albania"
     country_flag = models.URLField(max_length=500)  # URL của cờ quốc gia
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.country_name
@@ -32,6 +33,7 @@ class League(models.Model):  # request("GET", "/v3/leagues", headers=headers)
     url_league_trfmt = models.URLField(blank=True, null=True)
     url_league_injury_trfmt = models.URLField(blank=True, null=True)
     url_league_suspend_trfmt = models.URLField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
@@ -73,6 +75,7 @@ class LeagueStanding(models.Model):
     legend_color = models.CharField(max_length=50, null=True, blank=True)  # Cột màu sắc
     legend_color_custom = models.CharField(max_length=55, null=True, blank=True)
     update_time = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('league_id', 'season', 'rank')    
@@ -95,6 +98,7 @@ class Team(models.Model):  # request("GET", "/v3/teams?id={33}", headers=headers
     venue_capacity = models.IntegerField(blank=True, null=True)
     venue_surface = models.CharField(max_length=50, blank=True, null=True)
     venue_image = models.URLField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
@@ -184,6 +188,8 @@ class TeamSeasonStatistics(models.Model):  #request("GET", "/v3/teams/statistics
     penalty_missed = models.IntegerField(default=0)
     penalty_scored = models.IntegerField(default=0)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
         return f'{self.team.name} - {self.league.name} ({self.id})'
 
@@ -211,6 +217,7 @@ class Match(models.Model):  #request("GET", "/v3/fixtures?league={39}&season={20
     et_away = models.IntegerField(null=True, blank=True)
     pk_home = models.IntegerField(null=True, blank=True)
     pk_away = models.IntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.home} vs {self.away} - {self.league_id}"
@@ -230,6 +237,7 @@ class Player(models.Model):  # request("GET", "/v3/players?id={276}&season={2020
     position_transformed = models.CharField(max_length=10, null=True, blank=True)
     image = models.URLField(blank=True, null=True)
     image_custom = models.URLField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
@@ -298,6 +306,7 @@ class PlayerSeasonStatistics(models.Model):    #request("GET", "/v3/players?leag
     penalty_scored = models.IntegerField(default=0, null=True, blank=True)
     penalty_missed = models.IntegerField(default=0, null=True, blank=True)
     penalty_saved = models.IntegerField(default=0, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'{self.player.name} - {self.team.name} ({self.id})'
@@ -309,6 +318,7 @@ class StandingDescription(models.Model): #request("GET", "/v3/standings?league={
     season = models.CharField(max_length=20)  # Ví dụ: '2023-2024'
     rank = models.IntegerField()  # Ví dụ: 1, 2, 3,..., 20
     description = models.CharField(max_length=255, null=True, blank=True)  # Mô tả như "Promotion - Champions League", hoặc null
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'League: {self.league.name}, Season: {self.season}, Rank: {self.rank}'
@@ -324,6 +334,7 @@ class StandingDeduction(models.Model):  #Crawling Data to check if whether it ha
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='standing_deductions')  # Thêm related_name
     description = models.TextField(null=True, blank=True)
     points_deduction = models.IntegerField(default=0)  # Số điểm bị trừ
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.league} - {self.season} - Team: {self.team} - Reason: {self.description} - Points deduction: {self.points_deduction}"
@@ -331,34 +342,17 @@ class StandingDeduction(models.Model):  #Crawling Data to check if whether it ha
 
 #---------------------------------------------------------------------------------------------------------------
 #https://rapidapi.com/people-api-people-api-default/api/football-news11/playground/apiendpoint_7ba472f9-5c31-4342-a378-3fcfd45c7181
-class Category(models.Model):
-    CATEGORY_CHOICES = [
-        (0, "General"),
-        (3, "Transfers"),
-        (4, "General"),
-        (5, "Match Previews"),
-        (6, "Featured"),
-        (7, "Internationals"),
-    ]
-    
-    id = models.IntegerField(primary_key=True, choices=CATEGORY_CHOICES)
-    name = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.get_id_display()
-
-class News(models.Model):
+class NewsData(models.Model):
     id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho ID
     api_id = models.IntegerField(null=True, blank=True)  # Thêm trường api_id để lưu ID từ API
     title = models.CharField(max_length=255)  # Tiêu đề tin tức
     image_url = models.URLField(max_length=200, null=True, blank=True)  # URL hình ảnh
     original_url = models.URLField(max_length=200)  # URL gốc của tin tức
     published_at = models.DateTimeField()  # Ngày giờ phát hành
-    categories = models.ManyToManyField(Category, blank=True, default=None)  # Liên kết với Category model
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
-
 
 #---------------------------------------------------------------------------------------------------------------
 class Sidelined(models.Model):
@@ -366,16 +360,20 @@ class Sidelined(models.Model):
     type = models.CharField(max_length=255)  # Loại chấn thương hoặc lý do bị đình chỉ
     start_date = models.DateField(null=True, blank=True)  # Ngày bắt đầu chấn thương/đình chỉ
     end_date = models.DateField(null=True, blank=True)    # Ngày kết thúc chấn thương/đình chỉ
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.player.name} - {self.type} ({self.start_date} to {self.end_date})"
 
+
+#---------------------------------------------------------------------------------------------------------------
 class LastestSidelined(models.Model):
+    
     STATUS_CHOICES = [
         ('injured', 'Injured'),
         ('recovered', 'Recovered'),
     ]
-
+    api_id = models.ForeignKey(Player, to_field='api_id', on_delete=models.CASCADE, null=True, blank=True, db_index=True)
     team_name = models.CharField(max_length=255)
     player_name = models.CharField(max_length=255)
     player_link = models.URLField()
@@ -383,13 +381,10 @@ class LastestSidelined(models.Model):
     start_date = models.CharField(max_length=50, null=True, blank=True)
     end_date = models.CharField(max_length=50, null=True, blank=True)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='injured')
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.player_name} ({self.team_name})"
-
-#---------------------------------------------------------------------------------------------------------------
-
-
 
 
 

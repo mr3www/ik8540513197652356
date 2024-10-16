@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from .models import *
 import http.client
-import json, requests, time
+import json, requests, time, html
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 
@@ -714,18 +714,18 @@ def fetch_and_save_players(request):  # Client need add dropdown select season b
 def fetch_and_save_news(request):  # Limit 10/day
     today = datetime.today().strftime('%Y-%m-%d')
     yesterday = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
+    print(yesterday)
 
     url = "https://football-news11.p.rapidapi.com/api/news-by-date"
-    querystring_news = {"date": yesterday, "lang": "en", "page": "1"}
+    querystring_news = {"date": today, "lang": "en", "page": "1"}
 
     try:
         response = requests.get(url, headers=headers_news, params=querystring_news)
-        response.raise_for_status()  # Raises an exception for 4xx/5xx status codes
         data = response.json()
 
         for item in data.get('result', []):
             # Create or update News record
-            news, created = News.objects.update_or_create(
+            news, created = NewsData.objects.update_or_create(
                 api_id=item['id'],
                 defaults={
                     'title': item['title'],
@@ -734,14 +734,6 @@ def fetch_and_save_news(request):  # Limit 10/day
                     'published_at': datetime.strptime(item['published_at'], '%d-%m-%Y %H:%M:%S'),
                 }
             )
-
-            category_ids = item.get('categories', [])
-            if category_ids:
-                categories = Category.objects.filter(id__in=category_ids)
-                news.categories.set(categories)
-            else:
-                unknown_category, _ = Category.objects.get_or_create(id=0, name="Unknown")
-                news.categories.set([unknown_category])
 
             news.save()
 
@@ -826,6 +818,7 @@ def fetch_and_save_sidelined(request):
 #---------------------------------------------------------------------------------------------------------------
 def scrape_and_save_sidelined_players(request):
     crawled_data = []
+    base_url_sccwa = 'https://int.soccerway.com'
     
     # Fetch data from all the league URLs
     for url, league_name in url_league_sidelined.items():
@@ -854,7 +847,7 @@ def scrape_and_save_sidelined_players(request):
                         crawled_data.append({
                             'player': player_name,
                             'team': team_name,
-                            'player_link': player_link,
+                            'player_link': base_url_sccwa + player_link,
                             'injury_type': injury_type,
                             'start_date': start_date,
                             'end_date': end_date,
@@ -891,14 +884,62 @@ def crawl_data(crawled_data):
         injury_type = data['injury_type']
         start_date = data['start_date']
         end_date = data['end_date']
+        player_link=data['player_link']
 
-        # Kiểm tra xem chấn thương này đã tồn tại hay chưa bằng cách kiểm tra đồng thời cả cầu thủ, đội, loại chấn thương và ngày bắt đầu
-        if (player_name, team_name, injury_type, start_date) in existing_entries:
+        def normalize_player_name(name):
+            # Giải mã các ký tự HTML như &apos; thành '
+            name = html.unescape(name)
+            # Chuyển về chữ thường và loại bỏ khoảng trắng đầu/cuối
+            return name
+
+        normalized_player_name = normalize_player_name(player_name)
+
+        # Tìm kiếm cầu thủ trong cơ sở dữ liệu
+        players = Player.objects.filter(name__iexact=normalized_player_name)  # Tìm kiếm không phân biệt chữ hoa chữ thường
+        
+        if not players.exists():
+            print(f"Cầu thủ không tồn tại: {normalized_player_name}")
+            continue  # Bỏ qua nếu cầu thủ không tồn tại
+    
+        
+        if players.count() > 1:
+            print(players)
+            # Nếu có nhiều hơn một cầu thủ, xử lý từng cầu thủ
+            found_player = None
+            for player in players:
+                # Truy cập vào Player_link
+                response = requests.get(player_link, headers=headers_scrape_soccerway)
+                if response.status_code == 200:
+                    soup = BeautifulSoup(response.content, 'html.parser')
+                    
+                    # Lấy first_name từ thuộc tính data-first_name
+                    first_name_tag = soup.find('dd', {'data-first_name': True})
+                    if first_name_tag:
+                        first_name_from_web = first_name_tag.text
+                        print(f'web {first_name_from_web}')
+                        print(f'player {player.first_name}')
+                        # So sánh với first_name trong Player
+                        if first_name_from_web == player.first_name:  # So sánh không phân biệt chữ hoa chữ thường
+                            found_player = player
+                            break  # Dừng vòng lặp nếu đã tìm thấy cầu thủ khớp
+                else:
+                    print(f"Lỗi khi truy cập {player_link}: {response.status_code}")
+        else:
+            found_player = players.first()  # Lấy cầu thủ duy nhất
+
+        if not found_player:
+            print(f"Không tìm thấy cầu thủ nào khớp với tên: {normalized_player_name}")
+            continue
+
+        player_instance = found_player
+        
+        # Kiểm tra xem chấn thương này đã tồn tại hay chưa
+        if (normalized_player_name, team_name, injury_type, start_date) in existing_entries:
             # Nếu chấn thương này đã tồn tại, cập nhật thông tin mới nhất
             injury = LastestSidelined.objects.get(
-                player_name=player_name,
+                player_name=normalized_player_name,
+                api_id=player_instance,
                 team_name=team_name,
-                injury_type=injury_type,
                 start_date=start_date
             )
             injury.end_date = end_date
@@ -906,8 +947,9 @@ def crawl_data(crawled_data):
             injury.save()
         else:
             # Nếu đây là một chấn thương mới, thêm vào cơ sở dữ liệu
-            LastestSidelined.objects.create(
-                player_name=player_name,
+            injury = LastestSidelined.objects.create(
+                api_id=player_instance,
+                player_name=normalized_player_name,
                 team_name=team_name,
                 player_link=data['player_link'],
                 injury_type=injury_type,
@@ -915,6 +957,7 @@ def crawl_data(crawled_data):
                 end_date=end_date,
                 status='injured'  # Đặt trạng thái là 'injured'
             )
+            injury.save()
 
 #---------------------------------------------------------------------------------------------------------------
 def scrape_team_link(request):
