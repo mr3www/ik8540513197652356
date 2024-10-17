@@ -49,27 +49,13 @@
         {% csrf_token %}
         <button type="submit">Scrape Lastest Sidelined from Soccerway</button>
     </form>
-    <br>
-    <form action="{% url 'scrape_team_link' %}" method="post">
-        {% csrf_token %}
-        <button type="submit">Scrape Team Link from Transfermarkt</button>
-    </form>
-    <br>
-    <form action="{% url 'scrape_team_details' %}" method="post">
-        {% csrf_token %}
-        <button type="submit">Scrape Team Detail from Transfermarkt</button>
-    </form>
     <hr>
     <h1>FUNCTION TO UPDATE</h1>
     <form action="{% url 'update_legend_colors' %}" method="post">
         {% csrf_token %}
         <button type="submit">Update Legend Color for League Standings</button>
     </form>
-    <br>
-    <form action="{% url 'update_position_transformed' %}" method="post">
-        {% csrf_token %}
-        <button type="submit">Transformed Players position from Transfermarkt data.</button>
-    </form>
+
     {% else %}
     You not allowed to see this content
     {% endif %}

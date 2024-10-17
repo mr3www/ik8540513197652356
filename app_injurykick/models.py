@@ -40,6 +40,35 @@ class League(models.Model):  # request("GET", "/v3/leagues", headers=headers)
 
 
 #---------------------------------------------------------------------------------------------------------------
+class LeagueSeason(models.Model):
+    api_id = models.ForeignKey(League, to_field='api_id', on_delete=models.CASCADE)  # Liên kết với League thông qua api_id
+    season_year = models.IntegerField()  # Năm của mùa giải
+    start_date = models.DateField()  # Ngày bắt đầu mùa giải
+    end_date = models.DateField()  # Ngày kết thúc mùa giải
+    current_season = models.BooleanField(default=False)  # Mùa giải hiện tại hay không
+
+    # Các thông tin về độ phủ sóng của mùa giải
+    fixtures_events = models.BooleanField(default=False)
+    fixtures_lineups = models.BooleanField(default=False)
+    fixtures_statistics_fixtures = models.BooleanField(default=False)
+    fixtures_statistics_players = models.BooleanField(default=False)
+    standings = models.BooleanField(default=False)
+    players = models.BooleanField(default=False)
+    top_scorers = models.BooleanField(default=False)
+    top_assists = models.BooleanField(default=False)
+    top_cards = models.BooleanField(default=False)
+    injuries = models.BooleanField(default=False)
+    predictions = models.BooleanField(default=False)
+    odds = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('api_id', 'season_year')  # Đảm bảo mỗi mùa giải chỉ xuất hiện một lần cho mỗi giải đấu
+
+    def __str__(self):
+        return f"{self.api_id.name} - Season {self.season_year}"
+
+
+#---------------------------------------------------------------------------------------------------------------
 class LeagueStanding(models.Model):
     league_id = models.IntegerField()
     league_name = models.CharField(max_length=100)
@@ -242,11 +271,14 @@ class Player(models.Model):  # request("GET", "/v3/players?id={276}&season={2020
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
 
+    def clean_name(self):
+        return self.name.replace("&apos;", "'")
+
     def __str__(self):
         return f"{self.name}"
-    
 
-#---------------------------------------------------------------------------------------------------------------
+    
+#-----------------------------------------------------------------------------------------------------------
 class PlayerSeasonStatistics(models.Model):    #request("GET", "/v3/players?league={39}&season={2020}", headers=headers)
     id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho ID
     api_id = models.IntegerField()  # Thêm trường api_id để lưu ID từ API
@@ -387,72 +419,39 @@ class LastestSidelined(models.Model):
         return f"{self.player_name} ({self.team_name})"
 
 
+#---------------------------------------------------------------------------------------------------------------
+class Transfer(models.Model):
+    league = models.CharField(max_length=100)
+    team = models.CharField(max_length=100)
+    player = models.CharField(max_length=100)
+    date = models.DateField()
+    direction = models.CharField(max_length=10)  # "In" hoặc "Out"
+    from_team = models.CharField(max_length=100, blank=True)  # Có thể để trống nếu không có
+    transfer_type = models.CharField(max_length=50, blank=True)  # Loại chuyển nhượng
 
-
-
-
-
+    def __str__(self):
+        return f"{self.player} - {self.team} ({self.date})"
 
 
 #---------------------------------------------------------------------------------------------------------------
 
-class LeagueTeamLinkTransfermarktData(models.Model):
-    id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho id tự động tăng
-    league = models.CharField(max_length=255, null=True, blank=True)
-    season = models.IntegerField(null=True, blank=True)
-    team = models.CharField(max_length=255, null=True, blank=True)
-    link = models.URLField(null=True, blank=True)
-    image = models.URLField(null=True, blank=True)
-    trfmt_team_id = models.IntegerField(null=True, blank=True, unique=True)
 
-    def __str__(self):
-        return f"{self.league} {self.team} {self.link}"
 
-class PlayerTransfermarktData(models.Model):  # request("GET", "/v3/players?id={276}&season={2020}", headers=headers)
-    id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho id tự động tăng
-    league = models.CharField(max_length=255, null=True, blank=True)
-    season = models.IntegerField(null=True, blank=True)
-    name = models.CharField(max_length=255, db_index=True)
-    team = models.CharField(max_length=255, null=True, blank=True)
-    position = models.CharField(max_length=100, null=True, blank=True)
-    position_transformed = models.CharField(max_length=10, null=True, blank=True)
-    number = models.CharField(max_length=10, null=True, blank=True)
-    market_value = models.DecimalField(max_digits=15, decimal_places=2)
-    market_value_cleaned = models.CharField(max_length=255)
-    market_value_transformed = models.CharField(max_length=255)
-    image = models.URLField(null=True, blank=True)
-    player_link = models.URLField(null=True, blank=True)
-    trfmt_player_id = models.IntegerField(null=True, blank=True, unique=True)
 
-    def __str__(self):
-        return f"{self.name}"
 
-class Injury(models.Model):  # Crawling Data From Soccerway or Transfermarkt
-    id = models.AutoField(primary_key=True)  # Auto-incrementing ID
-    league = models.CharField(max_length=255, null=True, blank=True)  # ForeignKey to League model
-    player = models.CharField(max_length=255, null=True, blank=True)
-    team = models.CharField(max_length=255, null=True, blank=True)   
-    injury_type = models.CharField(max_length=255, null=True, blank=True)  # Type of injury
-    since = models.DateField(null=True, blank=True)  # Injury start date
-    until = models.DateField(null=True, blank=True)  # Expected return date
-    injury_or_suspension = models.CharField(max_length=10, null=True, blank=True)  # Injury or Suspension
-    trfmt_player_id = models.IntegerField(null=True, blank=True, unique=True)
 
-    def __str__(self):
-        return f"Injury: {self.player} ({self.injury_type}) - {self.since}"
 
-class TeamMapping(models.Model):
-    team_api = models.ForeignKey(Team, to_field='api_id', related_name='team_mapping', on_delete=models.CASCADE)  # Liên kết với model Team
-    team_transfermarkt = models.ForeignKey(LeagueTeamLinkTransfermarktData, to_field='trfmt_team_id', related_name='team_mapping', on_delete=models.CASCADE)  # Liên kết với model LeagueTeamLinkTransfermarktData
 
-    def __str__(self):
-        return f"{self.team_api.name} <-> {self.team_transfermarkt.team}"
 
-class PlayerMapping(models.Model):
-    player_api = models.ForeignKey(Player, to_field='api_id', related_name='player_mapping', on_delete=models.CASCADE)  # Liên kết với model Player
-    player_transfermarkt = models.ForeignKey(PlayerTransfermarktData, to_field='trfmt_player_id', related_name='player_mapping', on_delete=models.CASCADE)  # Liên kết với model PlayerTransfermarktData
 
-    def __str__(self):
-        return f"{self.player_api.name} <-> {self.player_transfermarkt.name}"
 
-#---------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+

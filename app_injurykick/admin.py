@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import League, Team, Match, LeagueStanding, Player
+from .models import League, Team, Match, LeagueStanding, Player, LastestSidelined
 from django.http import HttpResponse
 import http.client, json
 
@@ -69,7 +69,11 @@ class PlayerAdmin(admin.ModelAdmin):
     readonly_fields = ('id', 'api_id')
 
 #---------------------------------------------------------------------------------------------------------------
-
+class LastestSidelinedAdmin(admin.ModelAdmin):
+    list_display = ('player_name', 'team_name', 'injury_type', 'start_date', 'end_date', 'status', 'created_at')
+    list_filter = ('team_name', 'injury_type', 'status')
+    search_fields = ('player_name', 'team_name', 'injury_type')
+    ordering = ('-created_at',)
 
 
 
@@ -84,3 +88,5 @@ admin.site.register(LeagueStanding, LeagueStandingAdmin)
 admin.site.register(Team, TeamAdmin)
 admin.site.register(Match, MatchAdmin)
 admin.site.register(Player, PlayerAdmin)
+admin.site.register(LastestSidelined, LastestSidelinedAdmin)
+
