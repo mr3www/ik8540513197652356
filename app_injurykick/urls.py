@@ -18,6 +18,7 @@ urlpatterns = [
     
     # CRAWLING DATA
     path('scrape_and_save_sidelined_players/', views.scrape_and_save_sidelined_players, name='scrape_and_save_sidelined_players'),
+    path('scrape_and_save_transfers/', views.scrape_and_save_transfers, name='scrape_and_save_transfers'),
 
 
     # FUNCTION TO UPDATE DATA

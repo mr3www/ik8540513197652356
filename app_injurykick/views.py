@@ -29,8 +29,8 @@ headers_scrape_soccerway = {
     "sec-ch-ua-platform": '"Windows"',
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
 }
-
-leagues_id_list = [39]  # ID các giải đấu , 140, 135, 78, 61
+seasons_in_soccerway = ['20242025'] #Soccerway use javascript to load season content. Cannot change url
+leagues_id_list = [39]  # ID các giải đấu  39, 140, 135, 78, 61
 season_list = [2024]
 
 url_league_sidelined = {
@@ -172,10 +172,10 @@ def fetch_and_save_standings(request): # Change the code on the Top to get more 
                             league_id=league_id,
                             season=season,
                             rank=rank,
+                            team_id = team_id,
                             defaults={
                                 'league_name': league_name,
                                 'country_name': country_name,
-                                'team_id': team_id,
                                 'team_name': team_name,
                                 'logo': logo,
                                 'points': points,
@@ -737,7 +737,6 @@ def fetch_and_save_players(request):  # Client need add dropdown select season b
 def fetch_and_save_news(request):  # Limit 10/day
     today = datetime.today().strftime('%Y-%m-%d')
     yesterday = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
-    print(yesterday)
 
     url = "https://football-news11.p.rapidapi.com/api/news-by-date"
     querystring_news = {"date": today, "lang": "en", "page": "1"}
@@ -969,51 +968,83 @@ def crawl_data(crawled_data):
 
 
 #---------------------------------------------------------------------------------------------------------------
-def scrape_and_save_transfers():
-    url_league_transfer = {
-        'https://int.soccerway.com/national/england/premier-league/20242025/regular-season/r81780/transfers/': 'England Premier League',
-        'https://int.soccerway.com/national/spain/primera-division/20242025/regular-season/r82318/transfers/': 'Spain LaLiga',
-        'https://int.soccerway.com/national/italy/serie-a/20242025/regular-season/r82869/transfers/': 'Italy Serie A',
-        'https://int.soccerway.com/national/germany/bundesliga/20242025/regular-season/r81840/transfers/': 'Germany Bundesliga',
-        'https://int.soccerway.com/national/france/ligue-1/20242025/regular-season/r81802/transfers/': 'France Ligue 1',
+def scrape_and_save_transfers(request):
+
+    base_url_scw = 'https://int.soccerway.com'
+
+    base_urls = {
+        'https://int.soccerway.com/national/england/premier-league/20242025/regular-season/r81780/transfers/': 39,
+        'https://int.soccerway.com/national/spain/primera-division/20242025/regular-season/r82318/transfers/': 140,
+        'https://int.soccerway.com/national/italy/serie-a/20242025/regular-season/r82869/transfers/': 135,
+        'https://int.soccerway.com/national/germany/bundesliga/20242025/regular-season/r81840/transfers/': 78,
+        'https://int.soccerway.com/national/france/ligue-1/20242025/regular-season/r81802/transfers/': 61,
     }
 
-    for url, league_name in url_league_transfer.items():
-        response = requests.get(url)
-        soup = BeautifulSoup(response.content, 'html.parser')
-        transfers_table = soup.find('table', class_='transfers')
+    for season in seasons_in_soccerway:
+        season_year = season[:4]
+        for url, league_api_id in base_urls.items():
+            # Thay thế season hiện tại vào url
+            updated_url = url.replace('/20242025/', f'/{season}/')
 
-        current_team = ''
-        current_direction = ''
+            response = requests.get(updated_url, headers=headers_scrape_soccerway)
+            soup = BeautifulSoup(response.content, 'html.parser')
+            transfers_table = soup.find('table', class_='transfers')
 
-        for row in transfers_table.find_all('tr'):
-            if 'group-head' in row.get('class', []):  # Hàng tên đội
-                current_team = row.find('h3').text.strip()
-            elif 'subgroup-head' in row.get('class', []):  # Hàng 'Transfers in' hoặc 'Transfers out'
-                current_direction = 'In' if 'Transfers in' in row.text else 'Out'
-            else:  # Hàng dữ liệu cầu thủ
-                columns = row.find_all('td')
-                if len(columns) == 4:
-                    date_str = columns[0].text.strip()
-                    player = columns[1].text.strip()
-                    from_team = columns[2].text.strip()
-                    transfer_type = columns[3].text.strip()
+            current_team = ''
+            current_direction = ''
 
-                    # Chuyển đổi chuỗi ngày thành đối tượng date
-                    date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            for row in transfers_table.find_all('tr'):
+                if 'group-head' in row.get('class', []):  # Hàng tên đội
+                    current_team = row.find('h3').text.strip()
+                elif 'subgroup-head' in row.get('class', []):  # Hàng 'Transfers in' hoặc 'Transfers out'
+                    current_direction = 'In' if 'Transfers in' in row.text else 'Out'
+                else:  # Hàng dữ liệu cầu thủ
+                    columns = row.find_all('td')
+                    if len(columns) == 4:
+                        date_str = columns[0].text.strip()
+                        player = columns[1].text.strip()
+                        from_team_element = columns[2].find('a')
+                        transfer_type = columns[3].text.strip()
 
-                    # Lưu dữ liệu vào model
-                    transfer = Transfer(
-                        league=league_name,
-                        team=current_team,
-                        player=player,
-                        date=date,
-                        direction=current_direction,
-                        from_team=from_team,
-                        transfer_type=transfer_type
-                    )
-                    transfer.save()
+                        # Lấy thêm link và title của team
+                        from_team = from_team_element.text.strip()
+                        from_team_link = base_url_scw + from_team_element['href']
+                        from_team_title = from_team_element['title']
 
+                        # Chuyển đổi chuỗi ngày thành đối tượng date
+                        date = datetime.strptime(date_str, '%d/%m/%y').date()
+
+                        try:
+                            league = League.objects.get(api_id=league_api_id)
+
+                            # Lưu dữ liệu vào model
+                            transfer = Transfer(
+                                league=league,  # Sử dụng đối tượng League
+                                team=current_team,
+                                player=player,
+                                date=date,
+                                direction=current_direction,
+                                from_team=from_team,
+                                from_team_link=from_team_link,
+                                from_team_title=from_team_title,
+                                transfer_type=transfer_type,
+                                season=season_year  # Lưu năm đầu tiên của mùa giải
+                            )
+                            transfer.save()
+
+                            print(f"Saved transfer: {player} ({league_api_id}, {season_year})")
+
+                        except League.DoesNotExist:
+                            print(f"League with api_id {league_api_id} does not exist.")
+
+
+                        print(f"Saved transfer: {player} ({league.name}, {season})")
+            time.sleep(2)
+
+        print(f"Finished season {season_year}, waiting 5 seconds before starting the next season...")
+        time.sleep(5)
+    return HttpResponse("Success")
+                
 
 
 

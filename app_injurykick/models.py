@@ -120,7 +120,7 @@ class Team(models.Model):  # request("GET", "/v3/teams?id={33}", headers=headers
     founded = models.IntegerField(null=True, blank=True)
     image = models.URLField(blank=True, null=True)
     image_custom = models.URLField(blank=True, null=True)
-    venue_id = models.IntegerField(null=True, blank=True, db_index=True, unique=True)
+    venue_id = models.IntegerField(null=True, blank=True, db_index=True, unique=False)
     venue_name = models.CharField(max_length=255)
     venue_address = models.CharField(max_length=255, blank=True, null=True)
     venue_city = models.CharField(max_length=255, blank=True, null=True)
@@ -286,6 +286,7 @@ class PlayerSeasonStatistics(models.Model):    #request("GET", "/v3/players?leag
     team = models.ForeignKey('Team', to_field='api_id', related_name='player_statistics' ,on_delete=models.CASCADE)
     league = models.ForeignKey('League', to_field='api_id', related_name='player_statistics' ,on_delete=models.CASCADE)
     season = models.IntegerField(null=True, blank=True)
+    status = models.CharField(max_length=50, default="Current")
 
     appearances = models.IntegerField(default=0, null=True, blank=True)
     starting = models.IntegerField(default=0, null=True, blank=True)
@@ -421,20 +422,37 @@ class LastestSidelined(models.Model):
 
 #---------------------------------------------------------------------------------------------------------------
 class Transfer(models.Model):
-    league = models.CharField(max_length=100)
-    team = models.CharField(max_length=100)
-    player = models.CharField(max_length=100)
-    date = models.DateField()
-    direction = models.CharField(max_length=10)  # "In" hoặc "Out"
-    from_team = models.CharField(max_length=100, blank=True)  # Có thể để trống nếu không có
-    transfer_type = models.CharField(max_length=50, blank=True)  # Loại chuyển nhượng
+    league = models.ForeignKey(League, to_field='api_id', on_delete=models.CASCADE)
+    season = models.CharField(max_length=9, null=True, blank=True)
+    team = models.CharField(max_length=100)  # Đội bóng hiện tại
+    player = models.CharField(max_length=100)  # Tên cầu thủ
+    date = models.DateField()  # Ngày chuyển nhượng
+    direction = models.CharField(max_length=10, choices=[('In', 'In'), ('Out', 'Out')])  # Hướng chuyển nhượng (vào/ra)
+    from_team = models.CharField(max_length=100)  # Đội trước đó của cầu thủ
+    from_team_link = models.URLField(max_length=255, blank=True)  # Link đội bóng
+    from_team_title = models.CharField(max_length=100, blank=True)  # Title của đội bóng
+    transfer_type = models.CharField(max_length=50)  # Loại chuyển nhượng (VD: Transfer, Loan, Free)
+
+    class Meta:
+        verbose_name = 'Transfer'
+        verbose_name_plural = 'Transfers'
+        ordering = ['-date']  # Sắp xếp theo ngày mới nhất
 
     def __str__(self):
-        return f"{self.player} - {self.team} ({self.date})"
+        return f"{self.player} - {self.team} ({self.direction})"
 
 
 #---------------------------------------------------------------------------------------------------------------
+class TeamMapping(models.Model):
+    transfer_team_name = models.CharField(max_length=100)  # Tên đội bóng trong Transfer
+    team = models.ForeignKey('Team', to_field='api_id', related_name='mappings', on_delete=models.CASCADE)  # Liên kết tới model Team
 
+    class Meta:
+        verbose_name = 'Team Mapping'
+        verbose_name_plural = 'Team Mappings'
+    
+    def __str__(self):
+        return f"{self.transfer_team_name} -> {self.team.name}"
 
 
 

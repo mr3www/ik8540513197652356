@@ -49,6 +49,11 @@
         {% csrf_token %}
         <button type="submit">Scrape Lastest Sidelined from Soccerway</button>
     </form>
+    <br>
+    <form action="{% url 'scrape_and_save_transfers' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Scrape Transfer from Soccerway</button>
+    </form>
     <hr>
     <h1>FUNCTION TO UPDATE</h1>
     <form action="{% url 'update_legend_colors' %}" method="post">
