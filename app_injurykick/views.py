@@ -30,8 +30,8 @@ headers_scrape_soccerway = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
 }
 seasons_in_soccerway = ['20242025'] #Soccerway use javascript to load season content. Cannot change url
-leagues_id_list = [39]  # ID các giải đấu  39, 140, 135, 78, 61
-season_list = [2024]
+leagues_id_list = [39, 140, 135, 78, 61]  # ID các giải đấu  39, 140, 135, 78, 61
+season_list = [2020, 2021, 2022, 2023]
 
 url_league_sidelined = {
     'https://int.soccerway.com/national/england/premier-league/20242025/regular-season/r81780/sidelined/': 'England Premier League',
@@ -212,7 +212,7 @@ def fetch_and_save_standings(request): # Change the code on the Top to get more 
 def fetch_and_save_teams(request):  # Client need add dropdown select season before fetch team data. 
 
     # Lấy danh sách các đội bóng theo league_id và season
-    teams_in_league = LeagueStanding.objects.filter(season=2024).values('team_id')
+    teams_in_league = LeagueStanding.objects.filter(season=2023).values('team_id')
 
     # Gọi API cho từng team và lưu dữ liệu
     for team in teams_in_league:
@@ -511,7 +511,7 @@ def fetch_and_save_team_statistics_data(league_id, season, team_id):
 
 #---------------------------------------------------------------------------------------------------------------
 def fetch_and_save_matches(request):  # Client need add dropdown select season before fetch team data.
-    season = 2024
+    season = 2023
     grouped_data = LeagueStanding.objects.filter(season=season).values('league_id').distinct()
 
     for group in grouped_data:
@@ -789,7 +789,7 @@ def fetch_and_save_sidelined(request):
         players = players[half_point:]
     
     # Giới hạn của API mỗi phút
-    limit_per_minute = 300
+    limit_per_minute = 250
     
     # Tính số batch cần thiết
     num_batches = (players.count() // limit_per_minute) + (1 if players.count() % limit_per_minute != 0 else 0)

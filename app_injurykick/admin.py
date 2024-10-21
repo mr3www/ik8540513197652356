@@ -66,7 +66,7 @@ class PlayerAdmin(admin.ModelAdmin):
     ordering = ('name',)
 
     # Hiển thị chi tiết cầu thủ
-    readonly_fields = ('id', 'api_id')
+    readonly_fields = ('id',)
 
 #---------------------------------------------------------------------------------------------------------------
 class LastestSidelinedAdmin(admin.ModelAdmin):

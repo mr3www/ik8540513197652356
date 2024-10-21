@@ -103,8 +103,8 @@ class LeagueStanding(models.Model):
     description_deduction = models.CharField(max_length=255, null=True, blank=True)
     legend_color = models.CharField(max_length=50, null=True, blank=True)  # Cột màu sắc
     legend_color_custom = models.CharField(max_length=55, null=True, blank=True)
-    update_time = models.DateTimeField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    update_time = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     class Meta:
         unique_together = ('league_id', 'season', 'rank')    
@@ -455,6 +455,7 @@ class TeamMapping(models.Model):
         return f"{self.transfer_team_name} -> {self.team.name}"
 
 
+#---------------------------------------------------------------------------------------------------------------
 
 
 
