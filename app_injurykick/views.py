@@ -759,6 +759,131 @@ def fetch_and_save_players(request):  # Client need add dropdown select season b
     return HttpResponse("Team Statistics imported successfully.")
 
 
+def fetch_and_save_players_more_stats(request):
+    season = 2024
+    grouped_data = LeagueStanding.objects.filter(season=season).values('league_id').distinct()
+
+    for group in grouped_data:
+        league_id = group['league_id']
+        print(f"Processing league_id: {league_id}, season {season}")
+        teams_in_league = LeagueStanding.objects.filter(league_id=league_id).values('team_id')
+        print(f"Teams in league {league_id}: {list(teams_in_league)}")
+
+        for team in teams_in_league:
+            team_id = team['team_id']
+            print(f"Processing players from team_id: {team_id}")
+
+            url = "https://api-football-v1.p.rapidapi.com/v3/players"
+
+            all_players = []
+            current_page = 1
+
+            while True:
+                querystring = {"team": team_id, "season": season, "page": current_page}
+                response = requests.get(url, headers=headers, params=querystring)
+                data = response.json()
+
+                if 'response' not in data or not data['response']:
+                    break
+
+                players_data = data['response']
+                all_players.extend(players_data)
+
+                for player_data in players_data:
+                    player_info = player_data['player']
+                    
+                    for stats in player_data['statistics']:  # Duyệt qua tất cả statistics
+                        # Xác định position_transformed dựa trên position
+                        position = stats['games']['position']
+                        position_transformed = ''
+                        if position == 'Attacker':
+                            position_transformed = 'FW'
+                        elif position == 'Defender':
+                            position_transformed = 'DF'
+                        elif position == 'Midfielder':
+                            position_transformed = 'MF'
+                        elif position == 'Goalkeeper':
+                            position_transformed = 'GK'
+
+                        # Save player information
+                        player, created = Player.objects.update_or_create(
+                            api_id=player_info['id'],
+                            defaults={
+                                'api_id': player_info['id'],
+                                'name': player_info['name'],
+                                'first_name': player_info['firstname'],
+                                'last_name': player_info['lastname'],
+                                'date_of_birth': player_info['birth']['date'],
+                                'nationality': player_info['nationality'],
+                                'height': player_info['height'],
+                                'position': stats['games']['position'],
+                                'position_transformed': position_transformed,
+                                'image': player_info['photo']
+                            }
+                        )
+
+                        # Get or create team and league
+                        team, _ = Team.objects.get_or_create(api_id=stats['team']['id'], defaults={'name': stats['team']['name']})
+                        league, _ = League.objects.get_or_create(api_id=stats['league']['id'], defaults={'name': stats['league']['name']})
+
+                        # Save player statistics for each league and season
+                        PlayerSeasonStatistics.objects.update_or_create(
+                            player=player,
+                            team=team,
+                            league=league,
+                            season=season,
+                            defaults={
+                                'appearances': stats['games'].get('appearences', 0),
+                                'starting': stats['games'].get('lineups', 0),
+                                'subs_in': stats['substitutes'].get('in', 0),
+                                'subs_out': stats['substitutes'].get('out', 0),
+                                'bench': stats['substitutes'].get('bench', 0),
+                                'minutes': stats['games'].get('minutes', 0),
+                                'captain': stats['games'].get('captain', False),
+                                'rating': stats['games'].get('rating', None),
+                                'position': stats['games'].get('position', ''),
+                                'position_transformed': position_transformed,
+                                'shots_on': stats['shots'].get('on', 0),
+                                'shots_total': stats['shots'].get('total', 0),
+                                'goals': stats['goals'].get('total', 0),
+                                'conceded': stats['goals'].get('conceded', 0),
+                                'assists': stats['goals'].get('assists', 0),
+                                'saves': stats['goals'].get('saves', 0),
+                                'passes_total': stats['passes'].get('total', 0),
+                                'passes_key': stats['passes'].get('key', 0),
+                                'passes_accuracy': stats['passes'].get('accuracy', 0.0),
+                                'tackles_total': stats['tackles'].get('total', 0),
+                                'blocks': stats['tackles'].get('blocks', 0),
+                                'interceptions': stats['tackles'].get('interceptions', 0),
+                                'duels_total': stats['duels'].get('total', 0),
+                                'duels_won': stats['duels'].get('won', 0),
+                                'dribbles_attempts': stats['dribbles'].get('attempts', 0),
+                                'dribbles_success': stats['dribbles'].get('success', 0),
+                                'dribbles_past': stats['dribbles'].get('past', 0),
+                                'fouls_drawn': stats['fouls'].get('drawn', 0),
+                                'fouls_committed': stats['fouls'].get('committed', 0),
+                                'yellow_card': stats['cards'].get('yellow', 0),
+                                'yellowred_card': stats['cards'].get('yellowred', 0),
+                                'red_card': stats['cards'].get('red', 0),
+                                'penalty_won': stats['penalty'].get('won', 0),
+                                'penalty_committed': stats['penalty'].get('commited', 0),
+                                'penalty_scored': stats['penalty'].get('scored', 0),
+                                'penalty_missed': stats['penalty'].get('missed', 0),
+                                'penalty_saved': stats['penalty'].get('saved', 0),
+                            }
+                        )
+                print(f"Page {current_page} of {data['paging']['total']} fetched successfully.")
+                if current_page == data['paging']['total']:
+                    break
+
+                current_page += 1
+
+            print(f"League {league_id}, season {season}, total players fetched: {len(all_players)}")
+
+            time.sleep(10)
+
+    return HttpResponse("Team Statistics imported successfully.")
+
 #---------------------------------------------------------------------------------------------------------------
 def fetch_and_save_news(request):  # Limit 10/day
     today = datetime.today().strftime('%Y-%m-%d')
@@ -1142,3 +1267,9 @@ def convert_date(date_string):
     except ValueError:
         return None  # Return None if the date format is invalid
 #----
+
+def admin_view(request):
+    return render(request, 'admin.html')
+
+def index(request):
+    return render(request, 'index.html')

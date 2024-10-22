@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InjuryKick - Football Players Injuried & Suspension</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'image/favicon.png' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style-responsive.css' %}">
+
+</head>
+<body data-theme="light">
+    <div class="navbar">
+        <div class="logo">
+            <a href="">
+                <p class="sitename"><span style="color: var(--accent-2);">I</span>NJURYKICK</p>
+            </a>
+        </div>
+        <div class="ham-menu"></div>
+        <div class="menu hide">
+            <a href="" class="menu-item">League</a>
+            <a href="" class="menu-item">Analysis</a>
+            <a href="" class="menu-item">News</a>
+            <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M23.809 21.646l-6.205-6.205c1.167-1.605 1.857-3.579 1.857-5.711 0-5.365-4.365-9.73-9.731-9.73-5.365 0-9.73 4.365-9.73 9.73 0 5.366 4.365 9.73 9.73 9.73 2.034 0 3.923-.627 5.487-1.698l6.238 6.238 2.354-2.354zm-20.955-11.916c0-3.792 3.085-6.877 6.877-6.877s6.877 3.085 6.877 6.877-3.085 6.877-6.877 6.877c-3.793 0-6.877-3.085-6.877-6.877z"/></svg>
+            <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm7.753 18.305c-.261-.586-.789-.991-1.871-1.241-2.293-.529-4.428-.993-3.393-2.945 3.145-5.942.833-9.119-2.489-9.119-3.388 0-5.644 3.299-2.489 9.119 1.066 1.964-1.148 2.427-3.393 2.945-1.084.25-1.608.658-1.867 1.246-1.405-1.723-2.251-3.919-2.251-6.31 0-5.514 4.486-10 10-10s10 4.486 10 10c0 2.389-.845 4.583-2.247 6.305z"/></svg>
+        </div>
+    </div>
+    
+    <div class="quick-stats">
+        <div class="stats-box">
+            <div class="box-title">Big 5 Total Injuries</div>
+            <div class="box-content">
+                <div class="ticket-row"> 
+                    <p class="d-flex">
+                    <img class="img-custom-class-1" width="24" height="24" src="https://media.api-sports.io/football/leagues/39.png" alt="Premier League" style="margin-right: 4px;">Premier League</p>
+                    <p class="d-flex tick-chart" style="width: 100%;"></p>
+                    <p class="ticket-count">100</p>
+                </div>
+                <div class="ticket-row"> 
+                    <p class="d-flex">
+                    <img class=" img-custom-class-1" width="24" height="24" src="https://media.api-sports.io/football/leagues/78.png" alt="Bundesliga" style="margin-right: 4px;">Bundesliga</p>
+                    <p class="d-flex tick-chart" style="width: 80%;"></p>
+                    <p class="ticket-count">80</p>
+                </div>
+                <div class="ticket-row"> 
+                    <p class="d-flex">
+                    <img class=" img-custom-class-1" width="24" height="24" src="https://media.api-sports.io/football/leagues/140.png" alt="Bundesliga" style="margin-right: 4px;">La Liga</p>
+                    <p class="d-flex tick-chart" style="width: 60%;"></p>
+                    <p class="ticket-count">60</p>
+                </div>
+                <div class="ticket-row"> 
+                    <p class="d-flex">
+                    <img class=" img-custom-class-1" width="24" height="24" src="https://media.api-sports.io/football/leagues/135.png" alt="Bundesliga" style="margin-right: 4px;">Serie A</p>
+                    <p class="d-flex tick-chart" style="width: 40%;"></p>
+                    <p class="ticket-count">40</p>
+                </div>
+                <div class="ticket-row"> 
+                    <p class="d-flex">
+                    <img class=" img-custom-class-1" width="24" height="24" src="https://media.api-sports.io/football/leagues/61.png" alt="Bundesliga" style="margin-right: 4px;">Ligue 1</p>
+                    <p class="d-flex tick-chart" style="width: 20%;"></p>
+                    <p class="ticket-count">20</p>
+                </div>
+            </div>
+        </div>
+        <div class="stats-box">
+            <div class="box-title">Season Injuries</div>
+        </div>
+        <div class="stats-box">
+            <div class="box-title">Common Injuries</div>
+        </div>
+        <div class="stats-box">
+            <div class="box-title">Most Injuries</div>
+        </div>
+    </div>
+    
+
+
+</body>
+</html>
