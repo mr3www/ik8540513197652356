@@ -203,26 +203,30 @@ def fetch_and_save_standings(request): # Change the code on the Top to get more 
                                 'update_time': update_time,
                             }
                         )
-        time.sleep(5)  # Thêm thời gian tạm dừng 2 giây giữa mỗi giải đấu (league)
+        time.sleep(3)  # Thêm thời gian tạm dừng 3 giây giữa mỗi giải đấu (league)
 
     return HttpResponse("Standings imported successfully.")
 
 
 #---------------------------------------------------------------------------------------------------------------
-def fetch_and_save_teams(request):  # Client need add dropdown select season before fetch team data. 
-
+def fetch_and_save_teams(request):  
     # Lấy danh sách các đội bóng theo league_id và season
-    teams_in_league = LeagueStanding.objects.filter(season=2023).values('team_id')
+    teams_in_league = LeagueStanding.objects.values('team_id')
 
     # Gọi API cho từng team và lưu dữ liệu
     for team in teams_in_league:
         team_id = team['team_id']
         print(f"Processing team_id: {team_id}")
 
-        # Gọi hàm fetch_and_save_team_data để gọi API và lưu dữ liệu vào model Team
-        fetch_and_save_team_info(team_id)
-
-    time.sleep(5)  # Thêm thời gian tạm dừng 2 giây giữa mỗi giải đấu (league)
+        # Kiểm tra xem team với api_id đã tồn tại trong model Team chưa
+        try:
+            existing_team = Team.objects.get(api_id=team_id)
+            print(f"Team with api_id {team_id} already exists, skipping fetch.")
+        except Team.DoesNotExist:
+            print(f"Team with api_id {team_id} not found, fetching data...")
+            # Gọi hàm fetch_and_save_team_info để fetch dữ liệu từ API và lưu vào model Team
+            fetch_and_save_team_info(team_id)
+        time.sleep(2.5)
 
     return HttpResponse("Teams imported successfully.")
 
@@ -274,30 +278,40 @@ def fetch_and_save_team_info(team_id):
 
 
 #---------------------------------------------------------------------------------------------------------------
-def fetch_and_save_teams_statistic(request):  # Client need add dropdown select season before fetch team data.
-    season = 2024
-    grouped_data = LeagueStanding.objects.filter(season=season).values('league_id').distinct()
+def fetch_and_save_teams_statistic(request):  
+    for season in season_list:  # Lặp qua từng mùa giải trong season_list
+        print(f"Processing season: {season}")
+        grouped_data = LeagueStanding.objects.filter(season=season).values('league_id').distinct()
 
-    # Duyệt qua từng mùa giải và giải đấu
-    for group in grouped_data:
-        league_id = group['league_id']
-        print(f"Processing league_id: {league_id}")
+        # Duyệt qua từng mùa giải và giải đấu
+        for group in grouped_data:
+            league_id = group['league_id']
+            print(f"Processing league_id: {league_id} for season: {season}")
 
-        # Lấy danh sách các đội bóng theo league_id và season
-        teams_in_league = LeagueStanding.objects.filter(league_id=league_id).values('team_id')
-        print(f"Teams in league {league_id}: {list(teams_in_league)}")  # In ra danh sách đội
+            # Lấy danh sách các đội bóng theo league_id và season
+            teams_in_league = LeagueStanding.objects.filter(league_id=league_id, season=season).values('team_id')
+            print(f"Teams in league {league_id} for season {season}: {list(teams_in_league)}")
 
-        # Gọi API cho từng team và lưu dữ liệu
-        for team in teams_in_league:
-            team_id = team['team_id']
-            print(f"Processing team_id: {team_id}")
+            # Gọi API cho từng team và lưu dữ liệu
+            for team in teams_in_league:
+                team_id = team['team_id']
+                print(f"Processing team_id: {team_id} for season: {season}")
 
-            # Gọi hàm fetch_and_save_team_data để gọi API và lưu dữ liệu vào model Team
-            # fetch_and_save_team_statistics_data(league_id, season, team_id)
-        time.sleep(5)  # Thêm thời gian tạm dừng 2 giây giữa mỗi giải đấu (league)
+                # Kiểm tra xem team_id và season đã tồn tại trong TeamSeasonStatistics chưa
+                if not TeamSeasonStatistics.objects.filter(team__api_id=team_id, season=season).exists():
+                    print(f"Fetching data for team_id: {team_id}, season: {season}")
 
-    return HttpResponse("Team Statistics imported successfully.")
-    
+                    # Gọi hàm fetch_and_save_team_statistics_data để fetch dữ liệu và lưu
+                    fetch_and_save_team_statistics_data(league_id, season, team_id)
+                else:
+                    print(f"Data for team_id: {team_id}, season: {season} already exists. Skipping...")
+                time.sleep(2.5)
+
+            # Tạm dừng giữa mỗi giải đấu (league)
+            time.sleep(3)
+        time.sleep(3)
+
+    return HttpResponse("Team Statistics imported successfully for all seasons.")
 
 def fetch_and_save_team_statistics_data(league_id, season, team_id):
     url = "https://api-football-v1.p.rapidapi.com/v3/teams/statistics"
@@ -546,7 +560,9 @@ def fetch_and_save_matches(request):  # Client need add dropdown select season b
 
             # Trích xuất thông tin từ teams
             home_team_id = teams_data['home']['id'] #home
+            home_team_name = teams_data['home']['name']
             away_team_id = teams_data['away']['id'] #away
+            away_team_name = teams_data['away']['name']
 
             # Trích xuất thông tin từ score
             ht_score_data = score_data['halftime']
@@ -563,8 +579,18 @@ def fetch_and_save_matches(request):  # Client need add dropdown select season b
             pk_home = pk_score_data.get('home') #pk_home
             pk_away = pk_score_data.get('away') #pk_away
 
-            home_team = Team.objects.get(api_id=home_team_id)
-            away_team = Team.objects.get(api_id=away_team_id)
+            try:
+                home_team = Team.objects.get(api_id=home_team_id)
+            except Team.DoesNotExist:
+                print(f"Home team with api_id {home_team_id} team_name {home_team_name} not found, skipping match {match_id}.")
+                continue  # Bỏ qua nếu đội bóng không tìm thấy
+
+            try:
+                away_team = Team.objects.get(api_id=away_team_id)
+            except Team.DoesNotExist:
+                print(f"Away team with api_id {away_team_id} team_name {away_team_name} not found, skipping match {match_id}.")
+                continue  # Bỏ qua nếu đội bóng không tìm thấy
+
             league_id_new = League.objects.get(api_id=league_id)
 
             # Cập nhật hoặc tạo mới Match
@@ -594,7 +620,7 @@ def fetch_and_save_matches(request):  # Client need add dropdown select season b
                 }
             )
 
-        print(f"League {league_id} processed. Sleeping for 10 seconds...")
+        print(f"League {league_id} processed. Sleeping for 2 seconds...")
         time.sleep(2)  # Thêm thời gian tạm dừng 2 giây giữa mỗi giải đấu (league)
 
     return HttpResponse("Matches imported successfully.")
