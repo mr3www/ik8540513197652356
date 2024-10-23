@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>InjuryKick - Football Players Injuried & Suspension</title>
-    <link rel="icon" type="image/svg+xml" href="{% static 'image/favicon.png' %}">
+    <link rel="icon" type="image/svg+xml" href="{% static 'image/favicon-black.png' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
@@ -17,7 +17,10 @@
     <div class="navbar">
         <div class="logo">
             <a href="">
-                <p class="sitename"><span style="color: var(--accent-2);">I</span>NJURYKICK</p>
+                <p class="sitename d-flex align-center">    
+                    <img src="https://cdn-icons-png.flaticon.com/128/2695/2695875.png" width="30" height="30" style="margin-right: 12px;">
+                    INJURYKICK
+                </p>
             </a>
         </div>
         <div class="ham-menu"></div>
@@ -25,55 +28,115 @@
             <a href="" class="menu-item">League</a>
             <a href="" class="menu-item">Analysis</a>
             <a href="" class="menu-item">News</a>
-            <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M23.809 21.646l-6.205-6.205c1.167-1.605 1.857-3.579 1.857-5.711 0-5.365-4.365-9.73-9.731-9.73-5.365 0-9.73 4.365-9.73 9.73 0 5.366 4.365 9.73 9.73 9.73 2.034 0 3.923-.627 5.487-1.698l6.238 6.238 2.354-2.354zm-20.955-11.916c0-3.792 3.085-6.877 6.877-6.877s6.877 3.085 6.877 6.877-3.085 6.877-6.877 6.877c-3.793 0-6.877-3.085-6.877-6.877z"/></svg>
-            <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm7.753 18.305c-.261-.586-.789-.991-1.871-1.241-2.293-.529-4.428-.993-3.393-2.945 3.145-5.942.833-9.119-2.489-9.119-3.388 0-5.644 3.299-2.489 9.119 1.066 1.964-1.148 2.427-3.393 2.945-1.084.25-1.608.658-1.867 1.246-1.405-1.723-2.251-3.919-2.251-6.31 0-5.514 4.486-10 10-10s10 4.486 10 10c0 2.389-.845 4.583-2.247 6.305z"/></svg>
+            <svg class="menu-icon w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"></path>
+            </svg>
+            <svg class="menu-icon w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" d="M12 20a7.966 7.966 0 0 1-5.002-1.756l.002.001v-.683c0-1.794 1.492-3.25 3.333-3.25h3.334c1.84 0 3.333 1.456 3.333 3.25v.683A7.966 7.966 0 0 1 12 20ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10c0 5.5-4.44 9.963-9.932 10h-.138C6.438 21.962 2 17.5 2 12Zm10-5c-1.84 0-3.333 1.455-3.333 3.25S10.159 13.5 12 13.5c1.84 0 3.333-1.455 3.333-3.25S13.841 7 12 7Z" clip-rule="evenodd"></path>
+            </svg>
+            <button class="action-btn">Sign Up</button>
         </div>
     </div>
     
     <div class="quick-stats">
         <div class="stats-box">
-            <div class="box-title">Big 5 Total Injuries</div>
+            <div class="box-title d-flex align-center">League Injuries <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7" style="color: #808A9D;"></path>
+              </svg>
+              </div>
             <div class="box-content">
                 <div class="ticket-row"> 
-                    <p class="d-flex">
-                    <img class="img-custom-class-1" width="24" height="24" src="https://media.api-sports.io/football/leagues/39.png" alt="Premier League" style="margin-right: 4px;">Premier League</p>
-                    <p class="d-flex tick-chart" style="width: 100%;"></p>
+                    <p class="d-flex align-center">
+                    1 <img class="img-custom-class-1" width="24" height="24" src="https://media.api-sports.io/football/leagues/39.png" alt="Premier League">Premier League</p>
                     <p class="ticket-count">100</p>
                 </div>
                 <div class="ticket-row"> 
-                    <p class="d-flex">
-                    <img class=" img-custom-class-1" width="24" height="24" src="https://media.api-sports.io/football/leagues/78.png" alt="Bundesliga" style="margin-right: 4px;">Bundesliga</p>
-                    <p class="d-flex tick-chart" style="width: 80%;"></p>
+                    <p class="d-flex align-center">
+                    2 <img class=" img-custom-class-1" width="24" height="24" src="https://media.api-sports.io/football/leagues/78.png" alt="Bundesliga">Bundesliga</p>
                     <p class="ticket-count">80</p>
                 </div>
                 <div class="ticket-row"> 
-                    <p class="d-flex">
-                    <img class=" img-custom-class-1" width="24" height="24" src="https://media.api-sports.io/football/leagues/140.png" alt="Bundesliga" style="margin-right: 4px;">La Liga</p>
-                    <p class="d-flex tick-chart" style="width: 60%;"></p>
+                    <p class="d-flex align-center">
+                    3 <img class=" img-custom-class-1" width="24" height="24" src="https://media.api-sports.io/football/leagues/140.png" alt="Bundesliga">La Liga</p>
                     <p class="ticket-count">60</p>
                 </div>
                 <div class="ticket-row"> 
-                    <p class="d-flex">
-                    <img class=" img-custom-class-1" width="24" height="24" src="https://media.api-sports.io/football/leagues/135.png" alt="Bundesliga" style="margin-right: 4px;">Serie A</p>
-                    <p class="d-flex tick-chart" style="width: 40%;"></p>
+                    <p class="d-flex align-center">
+                    4 <img class=" img-custom-class-1" width="24" height="24" src="https://media.api-sports.io/football/leagues/135.png" alt="Bundesliga">Serie A</p>
                     <p class="ticket-count">40</p>
                 </div>
                 <div class="ticket-row"> 
-                    <p class="d-flex">
-                    <img class=" img-custom-class-1" width="24" height="24" src="https://media.api-sports.io/football/leagues/61.png" alt="Bundesliga" style="margin-right: 4px;">Ligue 1</p>
-                    <p class="d-flex tick-chart" style="width: 20%;"></p>
+                    <p class="d-flex align-center">
+                    5 <img class=" img-custom-class-1" width="24" height="24" src="https://media.api-sports.io/football/leagues/61.png" alt="Bundesliga">Ligue 1</p>
                     <p class="ticket-count">20</p>
                 </div>
             </div>
         </div>
         <div class="stats-box">
-            <div class="box-title">Season Injuries</div>
+            <div class="box-title d-flex align-center">Team Injuries <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7" style="color: #808A9D;"></path>
+              </svg>
+              </div>
+            <div class="box-content">
+                <div class="ticket-row"> 
+                    <p class="d-flex align-center">
+                    1 <img class="img-custom-class-1" width="24" height="24" src="https://media-3.api-sports.io/football/teams/50.png" alt="Premier League">Premier League</p>
+                    <p class="ticket-count">100</p>
+                </div>
+                <div class="ticket-row"> 
+                    <p class="d-flex align-center">
+                    2 <img class=" img-custom-class-1" width="24" height="24" src="https://media-3.api-sports.io/football/teams/51.png" alt="Bundesliga">Bundesliga</p>
+                    <p class="ticket-count">80</p>
+                </div>
+                <div class="ticket-row"> 
+                    <p class="d-flex align-center">
+                    3 <img class=" img-custom-class-1" width="24" height="24" src="https://media-3.api-sports.io/football/teams/52.png" alt="Bundesliga">La Liga</p>
+                    <p class="ticket-count">60</p>
+                </div>
+                <div class="ticket-row"> 
+                    <p class="d-flex align-center">
+                    4 <img class=" img-custom-class-1" width="24" height="24" src="https://media-3.api-sports.io/football/teams/53.png" alt="Bundesliga">Serie A</p>
+                    <p class="ticket-count">40</p>
+                </div>
+                <div class="ticket-row"> 
+                    <p class="d-flex align-center">
+                    5 <img class=" img-custom-class-1" width="24" height="24" src="https://media-3.api-sports.io/football/teams/54.png" alt="Bundesliga">Ligue 1</p>
+                    <p class="ticket-count">20</p>
+                </div>
+            </div>
         </div>
         <div class="stats-box">
-            <div class="box-title">Common Injuries</div>
-        </div>
-        <div class="stats-box">
-            <div class="box-title">Most Injuries</div>
+            <div class="box-title d-flex align-center">Common Injuries <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7" style="color: #808A9D;"></path>
+              </svg>
+              </div>
+            <div class="box-content">
+                <div class="ticket-row"> 
+                    <p class="d-flex align-center">
+                        <span>1</span> <img class=" img-custom-class-1" width="24" height="24" src="{% static 'image/medic.png' %}" alt="Bundesliga">Back Injury</p>
+                    <p class="ticket-count">100</p>
+                </div>
+                <div class="ticket-row"> 
+                    <p class="d-flex align-center">
+                        <span>2</span> <img class=" img-custom-class-1" width="24" height="24" src="{% static 'image/medic.png' %}" alt="Bundesliga">Knee Injury</p>
+                    <p class="ticket-count">100</p>
+                </div>
+                <div class="ticket-row"> 
+                    <p class="d-flex align-center">
+                        <span>3</span> <img class=" img-custom-class-1" width="24" height="24" src="{% static 'image/medic.png' %}" alt="Bundesliga">Hamstring</p>
+                    <p class="ticket-count">100</p>
+                </div>
+                <div class="ticket-row"> 
+                    <p class="d-flex align-center">
+                        <span>4</span> <img class=" img-custom-class-1" width="24" height="24" src="{% static 'image/medic.png' %}" alt="Bundesliga">Ankle Injury</p>
+                    <p class="ticket-count">100</p>
+                </div>
+                <div class="ticket-row"> 
+                    <p class="d-flex align-center">
+                        <span>5</span> <img class=" img-custom-class-1" width="24" height="24" src="{% static 'image/medic.png' %}" alt="Bundesliga">Toe Injury</p>
+                    <p class="ticket-count">100</p>
+                </div>
+            </div>
         </div>
     </div>
     

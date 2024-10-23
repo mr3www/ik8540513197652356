@@ -29,7 +29,7 @@
     --bg: #fbfbfe;
     --surface: #f3f3f6;
     --surface-hover: rgba(0, 0, 0, 0.03);
-    --primary: #1b11df;
+    --primary: #3861fb;
     --secondary: #dedcff;
     --secondary30: hsl(225, 100%, 92%, 30%);
     --accent: #000000;
@@ -37,7 +37,7 @@
     --accent-2: #FF5722;
     --accent-3: #8BC34A;
     --accent-4: #ffb8b8;
-    --gradient: linear-gradient(160deg,#1b11df,#000000);
+    --gradient: linear-gradient(160deg,#3861fb,#000000);
 
     --small: calc(var(--p) / var(--font-scale));
     --margin-lg: 0 12%;
@@ -183,8 +183,7 @@ p {
     position: fixed;
     z-index: 9997;
     border-bottom: 1px solid var(--static7);
-    background-color: var(--accent);
-    color: var(--text-on-accent);
+    background-color: var(--bg);
 }
 
 .sitename {
@@ -213,7 +212,7 @@ p {
     width: 0;
     transition: all .2s;
     position: absolute;
-    border-bottom: 3px solid var(--accent-4);
+    border-bottom: 3px solid var(--accent-2);
     left: 0;
     bottom: 0;
 }
@@ -225,12 +224,8 @@ p {
 .menu-icon {
     margin: 0 0.5rem;
     position: relative;
-    top: 4px;
+    top: 8px;
     cursor: pointer;
-}
-
-.menu-icon path {
-    fill: #fff;
 }
 
 .menu-icon:hover{
@@ -266,6 +261,7 @@ p {
     font-weight: var(--font-weight-bold);
     font-size: var(--p);
     margin-bottom: 6px;
+    gap: 4px;
 }
 
 .box-content {
@@ -280,16 +276,24 @@ p {
     justify-content: space-between;
     width: 100%;
     position: relative;
-    margin-top: 6px;
+    margin: 6px 0;
 }
 
 .ticket-row p {
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-base);
     font-weight: var(--font-weight-normal);
 }
 
 .d-flex {
     display: flex;
+}
+
+.align-center {
+    align-items: center;
+}
+
+.ticket-row .img-custom-class-1 {
+    margin: 0 6px;
 }
 
 .img-custom-class-1 {
@@ -306,5 +310,21 @@ p.ticket-count {
 }
 
 .tick-chart {
-    border-bottom: 6px solid var(--accent-4);
+    border-bottom: 4px solid var(--accent-2);
+    border-radius: var(--border-radius-md);
+}
+
+.action-btn {
+    border-radius: var(--border-radius-md);
+    padding: .33em 1.33em;
+    background: var(--primary);
+    color: var(--text-on-accent);
+    border: none;
+    height: 32px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: .8;
 }
