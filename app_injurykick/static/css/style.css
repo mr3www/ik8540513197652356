@@ -237,8 +237,20 @@ p {
     align-items: center;
     justify-content: space-between;
     gap: 1em;
-    margin: 6rem 0;
     width: 100%;
+}
+
+.quick-stats-title {
+    margin: 6rem 0 1rem 0;
+    width: 100%;
+    font-size: 25px;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.quick-stats-title p {
+    color: #58667e;
+    font-size: var(--font-size-base);
 }
 
 .quick-stats .stats-box {
@@ -253,7 +265,12 @@ p {
     overflow: hidden;
     font-weight: 400;
     padding: 12px 0;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 4px 24px 0 rgba(88, 102, 126, .08), 0 1px 2px 0 rgba(88, 102, 126, .12);
+}
+
+.stats-box a:hover,
+.logo:hover {
+    opacity: .7;
 }
 
 .box-title {
@@ -327,4 +344,30 @@ p.ticket-count {
 
 button:hover {
     opacity: .8;
+}
+
+.stats-box:hover {
+    background-color: var(--);
+}
+
+.mt-12 {
+    margin-top: 12px;
+}
+
+.content-2-block {
+    width: 100%;
+    gap: 1em;
+}
+
+.content-2-block .content-block-1 {
+    flex-basis: 70%;
+}
+
+.content-2-block .content-block-2 {
+    flex-basis: 34%;
+}
+
+.content-main-1 {
+    box-shadow: 0 4px 24px 0 rgba(88, 102, 126, .08), 0 1px 2px 0 rgba(88, 102, 126, .12);
+    border-radius: var(--border-width-md);
 }
