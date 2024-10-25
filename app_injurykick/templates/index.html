@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>InjuryKick - Football Players Injuried & Suspension</title>
-    <link rel="icon" type="image/svg+xml" href="{% static 'image/favicon-black.png' %}">
+    <link rel="icon" type="image/svg+xml" href="{% static 'image/favicon-blue.png' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
@@ -18,7 +18,7 @@
         <div class="logo">
             <a href="">
                 <p class="sitename d-flex align-center">    
-                    <img src="https://cdn-icons-png.flaticon.com/128/2695/2695875.png" width="20" height="20" style="margin-right: 8px;">
+                    <img src="{% static 'image/favicon-black.png' %}" width="20" height="20" style="margin-right: 8px;">
                     Injurykick
                 </p>
             </a>
@@ -177,11 +177,40 @@
                 <span>🔥 Latest Injuries &amp; Suspension</span>
             </div>
             <div class="content-tab">
-                <div>Latest Injuries</div>
-                <div>Latest Returning</div>
+                <div class="filter-tab">
+                    <div class="iuFFJS active">Latest Injuries</div>
+                    <div class="iuFFJS">Latest Returning</div>
+                </div>
+                <div class="content-main-1 border-radius accent-5 mt-12 pd-1">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Team</th>
+                                <th>Type</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <img src="https://images.fotmob.com/image_resources/playerimages/737066.png" alt="Erling Haaland" width="30px" height="30px">
+                                    E.Haaland
+                                </td>
+                                <td>Manchester City</td>
+                                <td>Ankle Injury</td>
+                                <td>25 Oct. 24</td>
+                                <td>25 Nov. 25</td>
+                                <td>8.37</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="content-main-2">1</div>
             </div>
-            <div class="content-main-1">1</div>
-            <div class="content-main-2">1</div>
+            
         </div>
         <div class="content-block-2">
             <div class="quick-stats-title" style="margin: 1rem 0; font-size: var(--h5);">

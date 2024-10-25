@@ -37,6 +37,9 @@
     --accent-2: #FF5722;
     --accent-3: #8BC34A;
     --accent-4: #ffb8b8;
+    --accent-5: #FAE7E7;
+    --accent-6: #E7FAE8;
+    --accent-7: #E7F6FC;
     --gradient: linear-gradient(160deg,#3861fb,#000000);
 
     --small: calc(var(--p) / var(--font-scale));
@@ -212,7 +215,7 @@ p {
     width: 0;
     transition: all .2s;
     position: absolute;
-    border-bottom: 3px solid var(--accent-2);
+    border-bottom: 3px solid var(--primary);
     left: 0;
     bottom: 0;
 }
@@ -367,7 +370,62 @@ button:hover {
     flex-basis: 34%;
 }
 
-.content-main-1 {
+.content-2-block .content-block-1 .content-tab {
+    background-color: #fff;
+    padding: 1rem;
     box-shadow: 0 4px 24px 0 rgba(88, 102, 126, .08), 0 1px 2px 0 rgba(88, 102, 126, .12);
-    border-radius: var(--border-width-md);
+    border-radius: var(--border-radius-md);
+}
+
+.iuFFJS {
+    -webkit-box-align: center;
+    align-items: center;
+    background: transparent;
+    border: 0px;
+    border-radius: 8px;
+    display: inline-flex;
+    color: grey;
+    cursor: pointer;
+    -webkit-box-pack: center;
+    justify-content: center;
+    outline: 0px;
+    font-weight: 600;
+    width: auto;
+    height: 32px;
+    font-size: var(--font-size-base);
+    padding: 0px 16px;
+    line-height: 18px;
+}
+
+.iuFFJS.active {
+    padding: 0px 12px;
+    white-space: nowrap !important;
+    margin-right: 4px !important;
+    background-color: var(--secondary30);
+    color: var(--primary);
+}
+
+.filter-tab .iuFFJS:hover:not(:disabled) {
+    background: var(--secondary30);
+}
+
+.border-radius {
+    border-radius: var(--border-radius-md);
+}
+
+.accent-5 {
+    background-color: var(--accent-5);
+}
+
+.pd-1 {
+    padding: .3rem 1rem;
+}
+
+.content-main-1 table {
+    width: 100%;
+    font-size: var(--font-size-base);
+}
+
+.content-main-1 th, td {
+    text-align: left;
 }
