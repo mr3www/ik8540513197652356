@@ -40,17 +40,15 @@
     --accent-5: #FAE7E7;
     --accent-6: #E7FAE8;
     --accent-7: #E7F6FC;
-    --s10: #B71C1C;
+    --s0: #B71C1C;
     /* Score 9.01 > 10.00 (Extreme Risk)*/
-    --s8: #E64A19;
+    --s25: #E64A19;
     /* Score 8.01 > 9.00  (Very High Risk)*/
-    --s7: #FFA000;
+    --s50: #FFA000;
     /* Score 7.01 > 8.00  (High Risk)*/
-    --s6: #C8D301;
-    /* Score 6.01 > 7.00  (Moderate Risk)*/
-    --s3: #00BE25;
+    --s75: #ffe65b;
     /* Score 3.01 > 6.00  (Low Risk)*/
-    --s1: #3861FB;
+    --s99: #00be25;
     /* Score 0.00 > 3.00  (No Risk)*/
     --gradient: linear-gradient(160deg,#3861fb,#000000);
 
@@ -242,7 +240,6 @@ p {
     margin: 0 0.5rem;
     position: relative;
     top: 8px;
-    cursor: pointer;
 }
 
 .menu-icon:hover{
@@ -286,7 +283,8 @@ p {
 }
 
 .stats-box a:hover,
-.logo:hover {
+.logo:hover,
+.content-tab a:hover {
     opacity: .7;
 }
 
@@ -356,7 +354,6 @@ p.ticket-count {
     border: none;
     height: 32px;
     font-weight: 600;
-    cursor: pointer;
 }
 
 button:hover {
@@ -412,7 +409,7 @@ button:hover {
     flex-basis: 34%;
 }
 
-.content-2-block .content-block-1 .content-tab {
+.content-tab {
     background-color: #fff;
     padding: 1rem;
     box-shadow: 0 4px 24px 0 rgba(88, 102, 126, .08), 0 1px 2px 0 rgba(88, 102, 126, .12);
@@ -427,7 +424,6 @@ button:hover {
     border-radius: 8px;
     display: inline-flex;
     color: grey;
-    cursor: pointer;
     -webkit-box-pack: center;
     justify-content: center;
     outline: 0px;
@@ -439,7 +435,15 @@ button:hover {
     line-height: 18px;
 }
 
-.iuFFJS.active {
+.iuFFJS.injured-button.active {
+    padding: 0px 12px;
+    white-space: nowrap !important;
+    margin-right: 4px !important;
+    background-color: var(--accent-5);
+    color: var(--s0);
+}
+
+.iuFFJS.returning-button.active {
     padding: 0px 12px;
     white-space: nowrap !important;
     margin-right: 4px !important;
@@ -447,8 +451,17 @@ button:hover {
     color: var(--primary);
 }
 
-.filter-tab .iuFFJS:hover:not(:disabled) {
+.filter-tab {
+    border-bottom: 1px solid var(--static7);
+    padding-bottom: 0.5rem;
+}
+
+.filter-tab .iuFFJS.returning-button:hover:not(:disabled) {
     background: var(--secondary30);
+}
+
+.filter-tab .iuFFJS.injured-button:hover:not(:disabled) {
+    background: var(--accent-5);
 }
 
 .border-radius {
@@ -459,26 +472,40 @@ button:hover {
     background-color: var(--accent-5);
 }
 
-.pd-1 {
-    padding: .3rem 1rem;
+.secondary-30 {
+    background-color: var(--secondary30);
 }
 
-.content-main-1 table {
+.pd-1 {
+    padding: 1rem 1rem;
+}
+
+.content-main-1 table,
+.content-main-2 table{
     width: 100%;
     font-size: var(--font-size-base);
-    border-spacing: 2px 10px;
+    /* border-spacing: 2px 16px; */
+    border-collapse: collapse;
 }
 
-.content-main-1 thead tr {
+.content-main-1 table thead th,
+.content-main-2 table thead th {
     color: grey;
 }
 
-.content-main-1 th, td {
+.content-main-1 table td,
+.content-main-2 table td {
+    border-bottom: 1px solid var(--static7);
+    padding: 8px 2px;
+}
+
+.content-main-1 th, td,
+.content-main-2 th {
     text-align: left;
 }
 
 .d-none {
-    display: none;
+    display: none!important;
 }
 
 .flex-column {
@@ -497,9 +524,15 @@ button:hover {
 
 .player-position,
 .team-code,
-.from-date {
+.from-date,
+.to-date {
     color: grey;
     font-size: var(--font-size-sm);
+}
+
+.from-date,
+.to-date {
+    color: var(--text);
 }
 
 .player-info-link:hover,
@@ -520,8 +553,7 @@ button:hover {
     width: 80px;
 }
 
-.team-info:hover .team-name,
-.injury-type:hover .injury-name{
+.team-info:hover .team-name{
     display: block;
 }
 
@@ -543,14 +575,17 @@ button:hover {
     justify-content: center;
 }
 
+.justify-space-between {
+    justify-content: space-between;
+}
+
 .injury-type .injury-name {
     line-height: 1.5;
-    background: var(--accent);
-    padding: 2px 4px;
     font-size: var(--font-size-sm);
     border-radius: var(--border-radius-sm);
-    box-shadow: 0 4px 24px 0 rgba(88, 102, 126, .08), 0 1px 2px 0 rgba(88, 102, 126, .12);
-    color: var(--text-on-accent);
+    color: var(--text);
+    width: 100%;
+    font-weight: 500;
 }
 
 .relative {
@@ -569,6 +604,30 @@ button:hover {
     left: 28px;
 }
 
+.is-returning::before {
+    content: "";
+    background-image: url('/static/image/verify.png');
+    background-size: contain;
+    display: block;
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    top: -4px;
+    left: 28px;
+}
+
+.is-suspended::before {
+    content: "";
+    background-image: url('/static/image/redcard.png');
+    background-size: contain;
+    display: block;
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    top: -4px;
+    left: 28px;
+}
+
 .risk-score {
     padding: 6px 8px;
     font-weight: 700;
@@ -576,26 +635,154 @@ button:hover {
     color: var(--text-on-accent);
 }
 
-.s10 {
-    background-color: var(--s10);
+.risk-score.s50,
+.risk-score.s75 {
+    color: var(--text);
 }
 
-.s8 {
-    background: var(--s8);
+.s0 {
+    background-color: var(--s0);
 }
 
-.s7 {
-    background: var(--s7);
+.s25 {
+    background: var(--s25);
 }
 
-.s6 {
-    background-color: var(--s6);
+.s50 {
+    background-color: var(--s50);
 }
 
-.s3 {
-    background-color: var(--s3);
+.s75 {
+    background-color: var(--s75);
 }
 
-.s1 {
-    background-color: var(--s1);
+.s99 {
+    background-color: var(--s99);
+}
+
+.p-relative {
+    position: relative;
+}
+
+.add-favorite {
+    color: transparent;
+}
+
+.add-favorite path {
+    stroke: grey;
+}
+
+.add-favorite.active {
+    color: #fcd53f;
+}
+
+.add-favorite.active path,
+.add-favorite:hover path {
+    stroke: #fcd53f;
+    transition: .2s;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px; /* Khoảng cách giữa các phần tử */
+    font-family: Arial, sans-serif;
+}
+
+/* Pagination buttons */
+.pagination .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #fff; /* Màu nền của nút */
+    color: var(--text); /* Màu chữ */
+    font-size: 18px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Pagination buttons hover effect */
+.pagination .page-link:hover {
+    background-color: #c5c5c5;
+    color: var(--text);
+}
+
+/* Page information (e.g., "1 of 23") */
+.pagination .page-info {
+    font-size: var(--font-size-sm);
+    color: var(--text); /* Màu chữ */
+}
+
+.mt-1rem {
+    margin-top: 1rem;
+}
+
+/* Container for filter */
+.filter-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* Button to open filter options */
+.filter-button {
+    padding: 10px 20px;
+    border: none;
+    font-weight: 600;
+    border-radius: var(--border-radius-md);
+}
+
+/* Dropdown container */
+.filter-dropdown {
+    display: none;
+    position: absolute;
+    background-color: white;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-radius: 5px;
+    width: 200px;
+    z-index: 1;
+}
+
+/* Dropdown label and select styling */
+.filter-dropdown label {
+    font-weight: bold;
+    margin-top: 10px;
+    display: block;
+    color: #4b2c53;
+}
+
+.filter-dropdown select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+/* Style for team filter select when hidden */
+.team-filter-label,
+.team-filter {
+    display: none;
+}
+
+.border-radius-md {
+    border-radius: var(--border-radius-md);
+}
+
+.font-weight-bold {
+    font-weight: var(--font-weight-bold);
+}
+
+.gap-1 {
+    gap: 1rem;
 }
