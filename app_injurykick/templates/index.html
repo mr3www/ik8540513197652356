@@ -181,7 +181,9 @@
             </div>
             <div class="content-tab">
                 <a href="">
-                    <div class="box-title d-flex align-center">Latest Injuries
+                    <div class="box-title d-flex align-center">
+                        <img class="mr-8 img-custom-class-1" width="20" height="20" src="/static/image/medic.png" alt="Bundesliga">
+                        Latest Injuries
                         <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                             width="16" height="16" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -398,7 +400,9 @@
             </div>
             <div class="content-tab  mt-12">
                 <a href="">
-                    <div class="box-title d-flex align-center">Latest Returns
+                    <div class="box-title d-flex align-center">
+                        <img class="mr-8 img-custom-class-1" width="20" height="20" src="/static/image/verify.png" alt="Bundesliga">
+                        Latest Returns
                         <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                             width="16" height="16" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -610,10 +614,39 @@
         </div>
         <div class="content-block-2">
             <div class="quick-stats-title" style="margin: 1rem 0; font-size: var(--h5);">
-                <span>🚀 Quick Stats</span>
+                <span>🚀 Upcoming Matches</span>
             </div>
             <div class="content-tab">
-                asd
+                <div class="fixture-league-container">
+                    <a href="" class="fixture-league d-flex align-center mb-8" style="gap: 4px;">
+                        <img class="mr-8 img-custom-class-1" width="24" height="24" src="https://media.api-sports.io/football/leagues/135.png" alt="Bundesliga">
+                        <span style="padding: 0; margin-bottom: 0px;">
+                            Italy Serie A
+                        </span>
+                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7" style="color: #808A9D;"></path>
+                        </svg>
+                    </a>
+                    <a href="" class="fixture-match mt-1-rem">
+                        <div class="fixture-match-container d-flex flex-column">
+                            <div class="match--info d-flex justify-space-between p-relative align-center">Tomorrow, 00:00</div>
+                            <div class="match--home d-flex p-relative align-center">
+                                <img class="mr-8 img-custom-class-1" src="https://media-1.api-sports.io/football/teams/41.png" height="24" width="24" alt="Southampton">
+                                Southampton
+                            </div>
+                            <div class="match--away d-flex p-relative align-center">
+                                <img class="mr-8 img-custom-class-1" src="https://media-1.api-sports.io/football/teams/41.png" height="24" width="24" alt="Southampton">
+                                Southampton
+                            </div>
+                        </div>
+                       
+                    </a>
+
+                </div>
+                
+
+
+                </a>
             </div>
         </div>
     </main>
@@ -639,38 +672,6 @@
         });
     </script>
     
-    <script>
-        const wrapper = document.querySelector('.popular-leagues-wrapper');
-
-            let isDown = false;
-            let startX;
-            let scrollLeft;
-
-            wrapper.addEventListener('mousedown', (e) => {
-                isDown = true;
-                wrapper.classList.add('active');
-                startX = e.pageX - wrapper.offsetLeft;
-                scrollLeft = wrapper.scrollLeft;
-            });
-
-            wrapper.addEventListener('mouseleave', () => {
-                isDown = false;
-                wrapper.classList.remove('active');
-            });
-
-            wrapper.addEventListener('mouseup', () => {
-                isDown = false;
-                wrapper.classList.remove('active');
-            });
-
-            wrapper.addEventListener('mousemove', (e) => {
-                if (!isDown) return;
-                e.preventDefault();
-                const x = e.pageX - wrapper.offsetLeft;
-                const walk = (x - startX) * 2; // Tốc độ cuộn
-                wrapper.scrollLeft = scrollLeft - walk;
-            });
-
-    </script>
+    
 </body>
 </html>

@@ -255,7 +255,7 @@ p {
 }
 
 .quick-stats-title {
-    margin: 6rem 0 1rem 0;
+    margin: 3rem 0 1rem 0;
     width: 100%;
     font-size: 25px;
     font-weight: 700;
@@ -288,7 +288,8 @@ p {
     opacity: .7;
 }
 
-.box-title {
+.box-title,
+.fixture-league span {
     padding: 0 1rem;
     font-weight: var(--font-weight-bold);
     font-size: var(--p);
@@ -370,6 +371,10 @@ button:hover {
 
 .mt-8 {
     margin-top: 8px;
+}
+
+.mt-1-rem {
+    margin-top: 1rem;
 }
 
 .mb-12 {
@@ -496,12 +501,17 @@ button:hover {
 .content-main-1 table td,
 .content-main-2 table td {
     border-bottom: 1px solid var(--static7);
-    padding: 8px 2px;
+    padding: 6px 2px;
 }
 
 .content-main-1 th, td,
 .content-main-2 th {
     text-align: left;
+}
+
+.content-main-1 tbody tr:hover,
+.content-main-2 tbody tr:hover {
+    background-color: var(--static7);
 }
 
 .d-none {
@@ -673,12 +683,12 @@ button:hover {
 }
 
 .add-favorite.active {
-    color: #fcd53f;
+    color: var(--primary);
 }
 
 .add-favorite.active path,
 .add-favorite:hover path {
-    stroke: #fcd53f;
+    stroke: var(--primary);
     transition: .2s;
 }
 
@@ -785,4 +795,20 @@ button:hover {
 
 .gap-1 {
     gap: 1rem;
+}
+
+.match--info {
+    font-size: var(--font-size-sm);
+    color: grey;
+}
+
+.fixture-match-container {
+    padding: 0.5rem 0.5rem;
+    border: 1px solid var(--static7);
+    border-radius: var(--border-radius-md);
+}
+
+.match--home,
+.match--away {
+    font-size: var(--font-size-base);
 }
