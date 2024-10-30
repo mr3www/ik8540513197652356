@@ -39,6 +39,11 @@
         <button type="submit">Fetch & Save Players</button>
     </form>
     <br>
+    <form action="{% url 'fetch_and_save_fixtures' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Fetch & Save Fixtures (Events, Lineups, Stats, Player Stats)</button>
+    </form>
+    <br>
     <form action="{% url 'fetch_and_save_news' %}" method="post">
         {% csrf_token %}
         <button type="submit">Fetch & Save News</button>

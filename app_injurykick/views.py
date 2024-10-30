@@ -989,6 +989,134 @@ def fetch_and_save_sidelined(request):
 
 
 #---------------------------------------------------------------------------------------------------------------
+def fetch_and_save_fixtures(request):
+    url = "https://api-football-v1.p.rapidapi.com/v3/fixtures"
+    querystring = {"ids": "1208021-1208022-1208025-1208023-1208024"}
+
+    response = requests.get(url, headers=headers, params=querystring)
+    data = response.json().get("response", [])
+
+    for item in data:
+        match_api_id = item["fixture"]["id"]
+        match = Match.objects.get(api_id=match_api_id)
+
+        # Save events
+        for event in item.get("events", []):
+            player, _ = Player.objects.get_or_create(api_id=event["player"]["id"], defaults={"name": event["player"]["name"]})
+            assist_player = None
+            if event["assist"] and event["assist"]["id"]:
+                assist_player, _ = Player.objects.get_or_create(api_id=event["assist"]["id"], defaults={"name": event["assist"]["name"]})
+
+            FixtureEvents.objects.create(
+                match=match,
+                events_time_elapsed=event["time"]["elapsed"],
+                events_time_extra=event["time"].get("extra"),
+                events_team=Team.objects.get(api_id=event["team"]["id"]),
+                events_player=player,
+                events_player_assist=assist_player,
+                events_type=event["type"],
+                events_detail=event["detail"],
+                events_comment=event.get("comments")
+            )
+
+        # Save lineup players
+        lineups = item.get("lineups", [])
+        for lineup in lineups:
+            team = Team.objects.get(api_id=lineup["team"]["id"])
+            team = Team.objects.get(api_id=lineup["team"]["id"])
+            colors = lineup["team"].get("colors", {})
+            player_colors = colors.get("player", {})
+            for player_info in lineup["startXI"]:
+                player, _ = Player.objects.get_or_create(api_id=player_info["player"]["id"], defaults={"name": player_info["player"]["name"]})
+                FixtureLineupPlayer.objects.create(
+                    match=match,
+                    team=team,
+                    player=player,
+                    position=player_info["player"]["pos"],
+                    grid=player_info["player"]["grid"],
+                    shirt_number=player_info["player"]["number"],
+                    is_starting=True,
+                    color_primary=player_colors.get("primary", None),
+                    color_number=player_colors.get("number", None),
+                    color_border=player_colors.get("border", None),
+                    color_gk_primary=player_colors.get("primary", None),
+                    color_gk_number=player_colors.get("number", None),
+                    color_gk_border=player_colors.get("border", None),
+                )
+            for player_info in lineup["substitutes"]:
+                player, _ = Player.objects.get_or_create(api_id=player_info["player"]["id"], defaults={"name": player_info["player"]["name"]})
+                FixtureLineupPlayer.objects.create(
+                    match=match,
+                    team=team,
+                    player=player,
+                    position=player_info["player"]["pos"],
+                    grid=player_info["player"]["grid"],
+                    shirt_number=player_info["player"]["number"],
+                    is_starting=False
+                )
+
+        # Save team statistics
+        for stat in item.get("statistics", []):
+            team = Team.objects.get(api_id=stat["team"]["id"])
+            for stat_item in stat["statistics"]:
+                FixtureTeamStatistics.objects.update_or_create(
+                    match=match,
+                    team=team,
+                    stat_type=stat_item["type"],
+                    defaults={"value": stat_item["value"]}
+                )
+
+        # Save player statistics
+        for player_stat in item.get("players", []):
+            team = Team.objects.get(api_id=player_stat["team"]["id"])
+            for stat_info in player_stat["players"]:
+                player, _ = Player.objects.get_or_create(api_id=stat_info["player"]["id"], defaults={"name": stat_info["player"]["name"]})
+                stats = stat_info["statistics"][0]
+                FixturePlayerStatistics.objects.update_or_create(
+                    match=match,
+                    team=team,
+                    player=player,
+                    defaults={
+                        "minutes": stats["games"].get("minutes"),
+                        "number": stats["games"].get("number"),
+                        "position": stats["games"].get("position"),
+                        "rating": stats["games"].get("rating"),
+                        "captain": stats["games"].get("captain"),
+                        "substitute": stats["games"].get("substitute"),
+                        "substitute": stats.get("offside"),
+                        "shots_total": stats["shots"].get("total"),
+                        "shots_on": stats["shots"].get("on"),
+                        "goals_total": stats["goals"].get("total"),
+                        "goals_conceded": stats["goals"].get("conceded"),
+                        "goals_assists": stats["goals"].get("assists"),
+                        "goals_saves": stats["goals"].get("saves"),
+                        "passes_total": stats["passes"].get("total"),
+                        "passes_key": stats["passes"].get("key"),
+                        "passes_accuracy": stats["passes"].get("accuracy"),
+                        "tackles_total": stats["tackles"].get("total"),
+                        "tackles_blocks": stats["tackles"].get("blocks"),
+                        "tackles_interceptions": stats["tackles"].get("interceptions"),
+                        "duels_total": stats["duels"].get("total"),
+                        "duels_won": stats["duels"].get("won"),
+                        "dribbles_attempts": stats["dribbles"].get("attempts"),
+                        "dribbles_success": stats["dribbles"].get("success"),
+                        "dribbles_past": stats["dribbles"].get("past"),
+                        "fouls_drawn": stats["fouls"].get("drawn"),
+                        "fouls_committed": stats["fouls"].get("committed"),
+                        "cards_yellow": stats["cards"].get("yellow"),
+                        "cards_red": stats["cards"].get("red"),
+                        "penalty_won": stats["penalty"].get("won"),
+                        "penalty_committed": stats["penalty"].get("committed"),
+                        "penalty_scored": stats["penalty"].get("scored"),
+                        "penalty_missed": stats["penalty"].get("missed"),
+                        "penalty_saved": stats["penalty"].get("saved")
+                    }
+                )
+
+    return HttpResponse('Succesfully fetch and saved!')
+
+
+#---------------------------------------------------------------------------------------------------------------
 def scrape_and_save_sidelined_players(request):
     crawled_data = []
     base_url_sccwa = 'https://int.soccerway.com'

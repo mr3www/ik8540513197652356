@@ -456,7 +456,87 @@ class TeamMapping(models.Model):
 
 
 #---------------------------------------------------------------------------------------------------------------
+class FixtureEvents(models.Model):
+    match = models.ForeignKey(Match, to_field='api_id', on_delete=models.CASCADE, related_name='fixture_events')
+    events_time_elapsed = models.PositiveIntegerField()
+    events_time_extra = models.PositiveIntegerField(null=True, blank=True)
+    events_team = models.ForeignKey(Team, to_field='api_id', on_delete=models.CASCADE)
+    events_player = models.ForeignKey(Player, to_field='api_id', related_name='events', on_delete=models.CASCADE)
+    events_player_assist = models.ForeignKey(Player, to_field='api_id', null=True, blank=True, related_name='assists', on_delete=models.CASCADE)
+    events_type = models.CharField(max_length=50)
+    events_detail = models.TextField()
+    events_comment = models.TextField(null=True, blank=True)
 
+    class Meta:
+        unique_together = ()
+
+class FixtureLineupPlayer(models.Model):
+    match = models.ForeignKey(Match, to_field='api_id', on_delete=models.CASCADE, related_name='lineup_players')
+    team = models.ForeignKey(Team, to_field='api_id', on_delete=models.CASCADE)
+    player = models.ForeignKey(Player, to_field='api_id', on_delete=models.CASCADE)
+    position = models.CharField(max_length=10)
+    shirt_number = models.PositiveIntegerField(null=True, blank=True)
+    grid = models.CharField(max_length=10, null=True, blank=True)
+    is_starting = models.BooleanField(default=True)
+    color_primary = models.CharField(max_length=7, blank=True, null=True)
+    color_number = models.CharField(max_length=7, blank=True, null=True)
+    color_border = models.CharField(max_length=7, blank=True, null=True)
+    color_gk_primary = models.CharField(max_length=7, blank=True, null=True)
+    color_gk_number = models.CharField(max_length=7, blank=True, null=True)
+    color_gk_border = models.CharField(max_length=7, blank=True, null=True)
+
+    class Meta:
+        unique_together = ()
+
+class FixtureTeamStatistics(models.Model):
+    match = models.ForeignKey(Match, to_field='api_id', on_delete=models.CASCADE, related_name='team_statistics')
+    team = models.ForeignKey(Team, to_field='api_id', on_delete=models.CASCADE)
+    stat_type = models.CharField(max_length=50)
+    value = models.CharField(max_length=50, null=True, blank=True)
+
+    class Meta:
+        unique_together = ()
+
+class FixturePlayerStatistics(models.Model):
+    match = models.ForeignKey(Match, to_field='api_id', on_delete=models.CASCADE, related_name='player_statistics')
+    team = models.ForeignKey(Team, to_field='api_id', on_delete=models.CASCADE)
+    player = models.ForeignKey(Player, to_field='api_id', on_delete=models.CASCADE)
+    minutes = models.PositiveIntegerField(null=True, blank=True)
+    number = models.PositiveIntegerField(null=True, blank=True)
+    position = models.CharField(max_length=10, null=True, blank=True)
+    rating = models.CharField(max_length=5, null=True, blank=True)
+    captain = models.BooleanField(default=False)
+    substitute = models.BooleanField(default=False, null=True, blank=True)
+    offsides = models.PositiveIntegerField(null=True, blank=True)
+    shots_total = models.PositiveIntegerField(null=True, blank=True)
+    shots_on = models.PositiveIntegerField(null=True, blank=True)
+    goals_total = models.PositiveIntegerField(null=True, blank=True)
+    goals_conceded = models.PositiveIntegerField(null=True, blank=True)
+    goals_assists = models.PositiveIntegerField(null=True, blank=True)
+    goals_saves = models.PositiveIntegerField(null=True, blank=True)
+    passes_total = models.PositiveIntegerField(null=True, blank=True)
+    passes_key = models.PositiveIntegerField(null=True, blank=True)
+    passes_accuracy = models.CharField(max_length=10, null=True, blank=True)
+    tackles_total = models.PositiveIntegerField(null=True, blank=True)
+    tackles_blocks = models.PositiveIntegerField(null=True, blank=True)
+    tackles_interceptions = models.PositiveIntegerField(null=True, blank=True)
+    duels_total = models.PositiveIntegerField(null=True, blank=True)
+    duels_won = models.PositiveIntegerField(null=True, blank=True)
+    dribbles_attempts = models.PositiveIntegerField(null=True, blank=True)
+    dribbles_success = models.PositiveIntegerField(null=True, blank=True)
+    dribbles_past = models.PositiveIntegerField(null=True, blank=True)
+    fouls_drawn = models.PositiveIntegerField(null=True, blank=True)
+    fouls_committed = models.PositiveIntegerField(null=True, blank=True)
+    cards_yellow = models.PositiveIntegerField(null=True, blank=True)
+    cards_red = models.PositiveIntegerField(null=True, blank=True)
+    penalty_won = models.PositiveIntegerField(null=True, blank=True)
+    penalty_committed = models.PositiveIntegerField(null=True, blank=True)
+    penalty_scored = models.PositiveIntegerField(null=True, blank=True)
+    penalty_missed = models.PositiveIntegerField(null=True, blank=True)
+    penalty_saved = models.PositiveIntegerField(null=True, blank=True)
+
+    class Meta:
+            unique_together = ()
 
 
 

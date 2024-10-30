@@ -16,7 +16,7 @@ urlpatterns = [
     path('fetch-team-season-statistics/', views.fetch_and_save_teams_statistic, name='fetch_and_save_teams_statistic'),
     path('fetch_and_save_players/', views.fetch_and_save_players, name='fetch_and_save_players'),
     path('fetch_and_save_news/', views.fetch_and_save_news, name='fetch_and_save_news'),
-
+    path("fetch_and_save_fixtures/", views.fetch_and_save_fixtures, name="fetch_and_save_fixtures"),
     
     # CRAWLING DATA
     path('scrape_and_save_sidelined_players/', views.scrape_and_save_sidelined_players, name='scrape_and_save_sidelined_players'),
