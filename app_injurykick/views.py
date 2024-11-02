@@ -30,8 +30,8 @@ headers_scrape_soccerway = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
 }
 seasons_in_soccerway = ['20242025'] #Soccerway use javascript to load season content. Cannot change url
-leagues_id_list = [39, 140, 135, 78, 61]  # ID các giải đấu  39, 140, 135, 78, 61
-season_list = [2020, 2021, 2022, 2023]
+leagues_id_list = [39, 140, 135, 78, 61]  # ID các giải đấu  39, 140, 135, 78, 61, 2
+season_list = [2020, 2021, 2022, 2023, 2024]
 
 url_league_sidelined = {
     'https://int.soccerway.com/national/england/premier-league/20242025/regular-season/r81780/sidelined/': 'England Premier League',
@@ -126,92 +126,101 @@ def fetch_and_save_standings(request): # Change the code on the Top to get more 
                     country_name = league_data['country']
                     season = league_data['season']
                     
-                    for team_standing in league_data['standings'][0]:  # Giả sử bạn chỉ cần standings đầu tiên
-                        team = team_standing['team']
-                        rank = team_standing['rank']
-                        team_id = team['id']
-                        team_name = team['name']
-                        logo = team['logo']
-                        points = team_standing['points']
-                        goals_diff = team_standing['goalsDiff']
-                        description = team_standing['description']
-                        update_time = team_standing['update']
-                        
-                        all_stats = team_standing['all']
-                        played = all_stats['played']
-                        win = all_stats['win']
-                        draw = all_stats['draw']
-                        lose = all_stats['lose']
-                        goals_for = all_stats['goals']['for']
-                        goals_against = all_stats['goals']['against']
+                    for group_standings in league_data['standings']:
+                        for team_standing in group_standings: 
+                            team = team_standing['team']
+                            rank = team_standing['rank']
+                            team_id = team['id']
+                            team_name = team['name']
+                            logo = team['logo']
+                            points = team_standing['points']
+                            goals_diff = team_standing['goalsDiff']
+                            group = team_standing['group']
+                            form = team_standing['form']
+                            description = team_standing['description']
+                            update_time = team_standing['update']
+                            
+                            all_stats = team_standing['all']
+                            played = all_stats['played']
+                            win = all_stats['win']
+                            draw = all_stats['draw']
+                            lose = all_stats['lose']
+                            goals_for = all_stats['goals']['for']
+                            goals_against = all_stats['goals']['against']
 
-                        home_stats = team_standing['home']
-                        home_played = home_stats['played']
-                        home_win = home_stats['win']
-                        home_draw = home_stats['draw']
-                        home_lose = home_stats['lose']
-                        home_goals_for = home_stats['goals']['for']
-                        home_goals_against = home_stats['goals']['against']
+                            home_stats = team_standing['home']
+                            home_played = home_stats['played']
+                            home_win = home_stats['win']
+                            home_draw = home_stats['draw']
+                            home_lose = home_stats['lose']
+                            home_goals_for = home_stats['goals']['for']
+                            home_goals_against = home_stats['goals']['against']
 
-                        away_stats = team_standing['away']
-                        away_played = away_stats['played']
-                        away_win = away_stats['win']
-                        away_draw = away_stats['draw']
-                        away_lose = away_stats['lose']
-                        away_goals_for = away_stats['goals']['for']
-                        away_goals_against = away_stats['goals']['against']
+                            away_stats = team_standing['away']
+                            away_played = away_stats['played']
+                            away_win = away_stats['win']
+                            away_draw = away_stats['draw']
+                            away_lose = away_stats['lose']
+                            away_goals_for = away_stats['goals']['for']
+                            away_goals_against = away_stats['goals']['against']
 
-                        deduction_value = points - ((win * 3) + draw)
-                        if deduction_value >= 0:
-                            description_deduction = None
-                        else:
-                            description_deduction = f"{deduction_value} Points"
+                            deduction_value = points - ((win * 3) + draw)
+                            if deduction_value >= 0:
+                                description_deduction = None
+                            else:
+                                description_deduction = f"{deduction_value} Points"
 
-                        # Lưu hoặc cập nhật dữ liệu vào cơ sở dữ liệu
-                        LeagueStanding.objects.update_or_create(
-                            league_id=league_id,
-                            season=season,
-                            rank=rank,
-                            team_id = team_id,
-                            defaults={
-                                'league_name': league_name,
-                                'country_name': country_name,
-                                'team_name': team_name,
-                                'logo': logo,
-                                'points': points,
-                                'goals_diff': goals_diff,
-                                'played': played,
-                                'win': win,
-                                'draw': draw,
-                                'lose': lose,
-                                'goals_for': goals_for,
-                                'goals_against': goals_against,
-                                'home_played': home_played,
-                                'home_win': home_win,
-                                'home_draw': home_draw,
-                                'home_lose': home_lose,
-                                'home_goals_for': home_goals_for,
-                                'home_goals_against': home_goals_against,
-                                'away_played': away_played,
-                                'away_win': away_win,
-                                'away_draw': away_draw,
-                                'away_lose': away_lose,
-                                'away_goals_for': away_goals_for,
-                                'away_goals_against': away_goals_against,
-                                'description': description,
-                                'description_deduction': description_deduction,
-                                'update_time': update_time,
-                            }
-                        )
+                            # Lưu hoặc cập nhật dữ liệu vào cơ sở dữ liệu
+                            LeagueStanding.objects.update_or_create(
+                                league_id=league_id,
+                                season=season,
+                                team_id = team_id,
+                                defaults={
+                                    'league_name': league_name,
+                                    'country_name': country_name,
+                                    'team_name': team_name,
+                                    'rank': rank,
+                                    'logo': logo,
+                                    'points': points,
+                                    'goals_diff': goals_diff,
+                                    'group': group,
+                                    'form': form,
+                                    'played': played,
+                                    'win': win,
+                                    'draw': draw,
+                                    'lose': lose,
+                                    'goals_for': goals_for,
+                                    'goals_against': goals_against,
+                                    'home_played': home_played,
+                                    'home_win': home_win,
+                                    'home_draw': home_draw,
+                                    'home_lose': home_lose,
+                                    'home_goals_for': home_goals_for,
+                                    'home_goals_against': home_goals_against,
+                                    'away_played': away_played,
+                                    'away_win': away_win,
+                                    'away_draw': away_draw,
+                                    'away_lose': away_lose,
+                                    'away_goals_for': away_goals_for,
+                                    'away_goals_against': away_goals_against,
+                                    'description': description,
+                                    'description_deduction': description_deduction,
+                                    'update_time': update_time,
+                                }
+                            )
         time.sleep(3)  # Thêm thời gian tạm dừng 3 giây giữa mỗi giải đấu (league)
-
+    try:
+        update_legend_colors(request)
+        print("update_legend_colors ran successfully")
+    except Exception as e:
+        print("Error in update_legend_colors:", e)
     return HttpResponse("Standings imported successfully.")
 
 
 #---------------------------------------------------------------------------------------------------------------
 def fetch_and_save_teams(request):  
     # Lấy danh sách các đội bóng theo league_id và season
-    teams_in_league = LeagueStanding.objects.values('team_id')
+    teams_in_league = LeagueStanding.objects.values('team_id').distinct()
 
     # Gọi API cho từng team và lưu dữ liệu
     for team in teams_in_league:
@@ -557,6 +566,7 @@ def fetch_and_save_matches(request):  # Client need add dropdown select season b
             league_id = league_data['id'] #league_id
             country_name = league_data['country'] #country_name
             season = league_data['season'] #season
+            round = league_data['round']
 
             # Trích xuất thông tin từ teams
             home_team_id = teams_data['home']['id'] #home
@@ -599,6 +609,7 @@ def fetch_and_save_matches(request):  # Client need add dropdown select season b
                 defaults={
                     'api_id': match_id,
                     'season': season,
+                    'round': round,
                     'league_id': league_id_new,
                     'country_name': country_name,
                     'home': home_team,

@@ -80,6 +80,8 @@ class LeagueStanding(models.Model):
     logo = models.URLField()
     points = models.IntegerField()
     goals_diff = models.IntegerField()
+    group = models.CharField(max_length=255, null=True, blank=True)
+    form = models.CharField(max_length=50, null=True, blank=True)
     played = models.IntegerField(null=True, blank=True)
     win = models.IntegerField(null=True, blank=True)
     draw = models.IntegerField(null=True, blank=True)
@@ -105,10 +107,7 @@ class LeagueStanding(models.Model):
     legend_color_custom = models.CharField(max_length=55, null=True, blank=True)
     update_time = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
-
-    class Meta:
-        unique_together = ('league_id', 'season', 'rank')    
-
+    
 
 #---------------------------------------------------------------------------------------------------------------
 class Team(models.Model):  # request("GET", "/v3/teams?id={33}", headers=headers) . Need to find teamsid from League Standing
@@ -228,6 +227,7 @@ class Match(models.Model):  #request("GET", "/v3/fixtures?league={39}&season={20
     id = models.AutoField(primary_key=True)  # Sử dụng AutoField cho id tự động tăng
     api_id = models.IntegerField(null=True, blank=True, db_index=True, unique=True)  # ID từ API-FOOTBALL
     season = models.IntegerField(null=True, blank=True)
+    round = models.CharField(max_length=255, null=True, blank=True)
     league_id = models.ForeignKey(League, to_field='api_id', related_name='matches', on_delete=models.CASCADE, unique=False)
     country_name = models.CharField(max_length=255)
     home = models.ForeignKey(Team, to_field='api_id', related_name='home_matches', on_delete=models.CASCADE)
