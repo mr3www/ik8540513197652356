@@ -70,7 +70,7 @@ class LeagueSeason(models.Model):
 
 #---------------------------------------------------------------------------------------------------------------
 class LeagueStanding(models.Model):
-    league_id = models.IntegerField()
+    league_id = models.ForeignKey(League, on_delete=models.CASCADE, to_field='api_id')
     league_name = models.CharField(max_length=100)
     country_name = models.CharField(max_length=100)
     season = models.IntegerField()
@@ -247,6 +247,8 @@ class Match(models.Model):  #request("GET", "/v3/fixtures?league={39}&season={20
     pk_home = models.IntegerField(null=True, blank=True)
     pk_away = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    away_next = models.IntegerField(null=True, blank=True) 
+    home_next = models.IntegerField(null=True, blank=True)  
 
     def __str__(self):
         return f"{self.home} vs {self.away} - {self.league_id}"
@@ -388,8 +390,8 @@ class NewsData(models.Model):
         return self.title
 
 #---------------------------------------------------------------------------------------------------------------
-class Sidelined(models.Model):
-    player = models.ForeignKey(Player, on_delete=models.CASCADE)  # Liên kết với model Player
+class Sidelined(models.Model): 
+    player = models.ForeignKey('Player', to_field='api_id', related_name='player_sidelined' ,on_delete=models.CASCADE)  # Liên kết với model Player
     type = models.CharField(max_length=255)  # Loại chấn thương hoặc lý do bị đình chỉ
     start_date = models.DateField(null=True, blank=True)  # Ngày bắt đầu chấn thương/đình chỉ
     end_date = models.DateField(null=True, blank=True)    # Ngày kết thúc chấn thương/đình chỉ
@@ -406,6 +408,7 @@ class LastestSidelined(models.Model):
         ('injured', 'Injured'),
         ('recovered', 'Recovered'),
     ]
+
     api_id = models.ForeignKey(Player, to_field='api_id', on_delete=models.CASCADE, null=True, blank=True, db_index=True)
     team_name = models.CharField(max_length=255)
     player_name = models.CharField(max_length=255)

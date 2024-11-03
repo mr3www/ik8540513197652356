@@ -65,7 +65,11 @@
         {% csrf_token %}
         <button type="submit">Update Legend Color for League Standings</button>
     </form>
-
+    <br>
+    <form action="{% url 'update_next_matches' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Update Next Matches ID (Brackets)</button>
+    </form>
     {% else %}
     You not allowed to see this content
     {% endif %}

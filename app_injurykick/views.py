@@ -5,6 +5,7 @@ import http.client
 import json, requests, time, html
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
+from django.db.models import Q
 
 # Create your views here.
 # Đặt headers cho API
@@ -125,6 +126,12 @@ def fetch_and_save_standings(request): # Change the code on the Top to get more 
                     league_name = league_data['name']
                     country_name = league_data['country']
                     season = league_data['season']
+
+                    try:
+                        league_instance = League.objects.get(api_id=league_id)
+                    except League.DoesNotExist:
+                        print(f"League with api_id {league_id} does not exist.")
+                        continue
                     
                     for group_standings in league_data['standings']:
                         for team_standing in group_standings: 
@@ -165,14 +172,11 @@ def fetch_and_save_standings(request): # Change the code on the Top to get more 
                             away_goals_against = away_stats['goals']['against']
 
                             deduction_value = points - ((win * 3) + draw)
-                            if deduction_value >= 0:
-                                description_deduction = None
-                            else:
-                                description_deduction = f"{deduction_value} Points"
+                            description_deduction = None if deduction_value >= 0 else f"{deduction_value} Points"
 
                             # Lưu hoặc cập nhật dữ liệu vào cơ sở dữ liệu
                             LeagueStanding.objects.update_or_create(
-                                league_id=league_id,
+                                league_id=league_instance,
                                 season=season,
                                 team_id = team_id,
                                 defaults={
@@ -1398,7 +1402,47 @@ def update_legend_colors(request): #FOR STANDINGS TABLE DESCRIPTION
             standing.save()  # Lưu lại thay đổi
 
     return HttpResponse("Update Done")
-    
+
+def update_next_matches(request):
+    # Lấy tất cả các mùa giải và giải đấu từ cơ sở dữ liệu
+    seasons = Match.objects.values_list('season', flat=True).distinct()
+    leagues = Match.objects.values_list('league_id', flat=True).distinct()
+
+    for season in seasons:
+        for league in leagues:
+            # Lấy tất cả các trận đấu cho mùa giải và giải đấu hiện tại
+            matches = Match.objects.filter(season=season, league_id=league).order_by('date')
+
+            for match in matches:
+                # Tìm trận tiếp theo của đội khách (away_id)
+                next_away_match = (
+                    matches
+                    .filter(Q(home_id=match.away_id) | Q(away_id=match.away_id), date__gt=match.date)
+                    .order_by('date')
+                    .first()
+                )
+                if next_away_match:
+                    match.away_next = next_away_match.api_id
+                else:
+                    match.away_next = None  # Không cần thiết, nhưng có thể thêm để rõ ràng
+
+                # Tìm trận tiếp theo của đội nhà (home_id)
+                next_home_match = (
+                    matches
+                    .filter(Q(home_id=match.home_id) | Q(away_id=match.home_id), date__gt=match.date)
+                    .order_by('date')
+                    .first()
+                )
+                if next_home_match:
+                    match.home_next = next_home_match.api_id
+                else:
+                    match.home_next = None  # Không cần thiết, nhưng có thể thêm để rõ ràng
+
+                # Lưu cập nhật vào database
+                match.save()
+                
+    return HttpResponse("Update Done")
+
 def convert_date(date_string):
     try:
         # Parse the date in 'MMM DD, YYYY' format and convert to 'YYYY-MM-DD'

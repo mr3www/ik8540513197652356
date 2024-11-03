@@ -25,5 +25,6 @@ urlpatterns = [
 
     # FUNCTION TO UPDATE DATA
     path('update_legend_color/', views.update_legend_colors, name='update_legend_colors'),
+    path('update_next_matches/', views.update_next_matches, name='update_next_matches'),
 
 ]
