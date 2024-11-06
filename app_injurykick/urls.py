@@ -7,6 +7,8 @@ urlpatterns = [
     path('admin88888888/fetch-data/', lambda request: render(request, 'fetch_data.html'), name='fetch_data'),
     path('', views.index, name='index'),
     path('admin-test/', views.admin_view, name='admin_view'),
+    path('admin88888888/', lambda request: render(request, 'admin.html'), name='admin'),
+
 
     # FETCHING API
     path('fetch-leagues/', views.fetch_and_save_leagues, name='fetch_and_save_leagues'),
