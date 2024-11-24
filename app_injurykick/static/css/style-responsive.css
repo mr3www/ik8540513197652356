@@ -8,6 +8,12 @@
     }
 }
 
+@media screen and (max-width: 1200px) {
+    body {
+        margin: var(--margin-md);
+    }
+}
+
 @media screen and (max-width: 1000px) {
     .navbar {
         flex-wrap: wrap;
@@ -16,5 +22,82 @@
         margin: 0 20px;
         z-index: 10000;
         gap: 3em;
+    }
+}
+
+@media screen and (max-width: 992px) {
+    .content-2-block {
+        flex-direction: column;
+    }
+
+    .quick-stats {
+        min-height: 292px;
+        overflow-x: scroll;
+    }
+
+    .quick-stats .stats-box {
+        min-width: 300px;
+    }
+
+    body {
+        margin: var(--margin-sm);
+    }
+
+    .content-tab.about-us-tab{
+        height: 200px;
+        overflow-y: auto;
+    }
+    
+    .mobile-menu {
+        display: flex;
+    }
+
+    .menu-item, .btn-sign-up {
+        display: none;
+    }
+
+    .sitename {
+        font-size: var(--margin-sm);
+    }
+
+    .navbar {
+        flex-wrap: nowrap;
+    }
+
+    footer { 
+        padding-bottom: 80px;;
+    }
+
+    .modal {
+        width: 90%;
+    }
+
+    .modal .modal-body,
+    .modal input {
+        font-size: var(--font-size-base)!important;
+    }
+}
+
+@media screen and (max-width: 700px) {
+    .content-main-1 table th:nth-child(4),
+    .content-main-1 table td:nth-child(4){
+        display: none;
+    }
+
+    .player-info .player-name {
+        width: 60px;
+        font-size: var(--font-size-sm);
+    }
+
+    .content-tab {
+        padding: .5rem;
+    }
+
+    .pd-1 {
+        padding: 1rem .5rem;
+    }
+
+    .quick-stats-title {
+        font-size: 20px!important;
     }
 }

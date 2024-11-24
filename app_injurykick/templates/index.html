@@ -23,18 +23,29 @@
                 </p>
             </a>
         </div>
-        <div class="ham-menu"></div>
         <div class="menu hide">
             <a href="" class="menu-item">Analysis</a>
             <a href="" class="menu-item">News</a>
             <a href="" class="menu-item">⭐️ Favorites</a>
-            <svg class="menu-icon w-6 h-6 text-gray-800 dark:text-white cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <svg id="search-icon" class="menu-icon w-6 h-6 text-gray-800 dark:text-white cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                 <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"></path>
             </svg>
             <svg class="menu-icon w-6 h-6 text-gray-800 dark:text-white cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                 <path fill-rule="evenodd" d="M12 20a7.966 7.966 0 0 1-5.002-1.756l.002.001v-.683c0-1.794 1.492-3.25 3.333-3.25h3.334c1.84 0 3.333 1.456 3.333 3.25v.683A7.966 7.966 0 0 1 12 20ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10c0 5.5-4.44 9.963-9.932 10h-.138C6.438 21.962 2 17.5 2 12Zm10-5c-1.84 0-3.333 1.455-3.333 3.25S10.159 13.5 12 13.5c1.84 0 3.333-1.455 3.333-3.25S13.841 7 12 7Z" clip-rule="evenodd"></path>
             </svg>
-            <button class="action-btn cursor-pointer">Sign Up</button>
+            <button class="action-btn cursor-pointer btn-sign-up">Sign Up</button>
+        </div>
+        <div class="overlay" id="overlay"></div>
+        <!-- Modal -->
+        <div class="modal" id="search-modal">
+            <div class="modal-header">Search</div>
+            <div class="modal-body">
+                <input type="text" class="input-search" id="search-input" placeholder="Type to search...">
+                <div class="search-results" id="search-results">No results yet.</div>
+            </div>
+            <div class="modal-footer">
+                <button class="close-btn" id="close-btn">Close</button>
+            </div>
         </div>
     </div>
     <div class="popular-bar d-flex align-center">
@@ -196,7 +207,6 @@
                     <table>
                         <thead>
                             <tr>
-                                <th style="width: 50px; text-align: center;">Team</th>
                                 <th class="width-150">Player</th>
                                 <th class="width-150">Injury</th>
                                 <th style="text-align: center; width: 65px;">From</th>
@@ -206,15 +216,6 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td style="position: relative; text-align: center;">
-                                    <a href="" class="team-info-link">
-                                        <div class="team-info d-flex align-center justify-center">
-                                            <img src="https://api.sofascore.app/api/v1/team/17/image" alt="Manchester City"
-                                                width="40px" height="40px">
-                                            <span class="team-name d-none">Manchester City</span>
-                                        </div>
-                                    </a>
-                                </td>
                                 <td>
                                     <a href="" class="player-info-link">
                                         <div class="is-injuried d-flex align-center relative">
@@ -222,8 +223,11 @@
                                                 alt="Erling Haaland"
                                                 style="border: 1px solid rgba(34, 34, 38, 0.15);border-radius: 50%;object-fit: cover;height: 40px;width: 40px;">
                                             <div class="player-info d-flex flex-column">
-                                                <span class="player-name width-100 t-ellipsis">E.Haaland</span>
-                                                <span class="player-position">Forward</span>
+                                                <span class="player-name  t-ellipsis">E.Haaland</span>
+                                                <span class="player-position d-flex" style="gap: 2px;">
+                                                    <img src="https://api.sofascore.app/api/v1/team/17/image" alt="Manchester City" width="15px" height="15px">
+                                                    Forward
+                                                </span>
                                             </div>
                                         </div>
                                     </a>
@@ -251,15 +255,6 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td style="position: relative; text-align: center;">
-                                    <a href="" class="team-info-link">
-                                        <div class="team-info d-flex align-center justify-center">
-                                            <img src="https://api.sofascore.app/api/v1/team/17/image" alt="Manchester City"
-                                                width="40px" height="40px">
-                                            <span class="team-name d-none">Manchester City</span>
-                                        </div>
-                                    </a>
-                                </td>
                                 <td>
                                     <a href="" class="player-info-link">
                                         <div class="is-injuried d-flex align-center relative">
@@ -267,8 +262,11 @@
                                                 alt="Erling Haaland"
                                                 style="border: 1px solid rgba(34, 34, 38, 0.15);border-radius: 50%;object-fit: cover;height: 40px;width: 40px;">
                                             <div class="player-info d-flex flex-column">
-                                                <span class="player-name width-100 t-ellipsis">E.Haaland</span>
-                                                <span class="player-position">Forward</span>
+                                                <span class="player-name  t-ellipsis">E.Haaland</span>
+                                                <span class="player-position d-flex" style="gap: 2px;">
+                                                    <img src="https://api.sofascore.app/api/v1/team/17/image" alt="Manchester City" width="15px" height="15px">
+                                                    Forward
+                                                </span>
                                             </div>
                                         </div>
                                     </a>
@@ -296,15 +294,6 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td style="position: relative; text-align: center;">
-                                    <a href="" class="team-info-link">
-                                        <div class="team-info d-flex align-center justify-center">
-                                            <img src="https://media-3.api-sports.io/football/teams/52.png" alt="Manchester City"
-                                                width="40px" height="40px">
-                                            <span class="team-name d-none">Manchester City</span>
-                                        </div>
-                                    </a>
-                                </td>
                                 <td>
                                     <a href="" class="player-info-link">
                                         <div class="is-injuried d-flex align-center relative">
@@ -312,8 +301,11 @@
                                                 alt="Erling Haaland"
                                                 style="border: 1px solid rgba(34, 34, 38, 0.15);border-radius: 50%;object-fit: cover;height: 40px;width: 40px;">
                                             <div class="player-info d-flex flex-column">
-                                                <span class="player-name width-100 t-ellipsis">E.Haaland</span>
-                                                <span class="player-position">Forward</span>
+                                                <span class="player-name  t-ellipsis">E.Haaland</span>
+                                                <span class="player-position d-flex" style="gap: 2px;">
+                                                    <img src="https://api.sofascore.app/api/v1/team/17/image" alt="Manchester City" width="15px" height="15px">
+                                                    Forward
+                                                </span>
                                             </div>
                                         </div>
                                     </a>
@@ -326,7 +318,7 @@
                                     </div>
                                 </td>
                                 <td class="from-date" style="text-align: center;">15/10/24</td>
-                                <td class="to-date" style="text-align: center;">15/10/25</td>
+                                <td class="to-date" style="text-align: center;">Unknown</td>
                                 <td>
                                     <div class="add-favorite cursor-pointer d-flex justify-center p-relative" style="top: -2px;"
                                         title="Add to Favorites">
@@ -341,15 +333,6 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td style="position: relative; text-align: center;">
-                                    <a href="" class="team-info-link">
-                                        <div class="team-info d-flex align-center justify-center">
-                                            <img src="https://media-3.api-sports.io/football/teams/51.png" alt="Manchester City"
-                                                width="40px" height="40px">
-                                            <span class="team-name d-none">Manchester City</span>
-                                        </div>
-                                    </a>
-                                </td>
                                 <td>
                                     <a href="" class="player-info-link">
                                         <div class="is-injuried d-flex align-center relative">
@@ -357,8 +340,11 @@
                                                 alt="Erling Haaland"
                                                 style="border: 1px solid rgba(34, 34, 38, 0.15);border-radius: 50%;object-fit: cover;height: 40px;width: 40px;">
                                             <div class="player-info d-flex flex-column">
-                                                <span class="player-name width-100 t-ellipsis">E.Haaland</span>
-                                                <span class="player-position">Forward</span>
+                                                <span class="player-name  t-ellipsis">E.Haaland</span>
+                                                <span class="player-position d-flex" style="gap: 2px;">
+                                                    <img src="https://api.sofascore.app/api/v1/team/17/image" alt="Manchester City" width="15px" height="15px">
+                                                    Forward
+                                                </span>
                                             </div>
                                         </div>
                                     </a>
@@ -371,7 +357,7 @@
                                     </div>
                                 </td>
                                 <td class="from-date" style="text-align: center;">15/10/24</td>
-                                <td class="to-date" style="text-align: center;">15/10/25</td>
+                                <td class="to-date" style="text-align: center;">Unknown</td>
                                 <td>
                                     <div class="add-favorite cursor-pointer d-flex justify-center p-relative" style="top: -2px;"
                                         title="Add to Favorites">
@@ -386,15 +372,6 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td style="position: relative; text-align: center;">
-                                    <a href="" class="team-info-link">
-                                        <div class="team-info d-flex align-center justify-center">
-                                            <img src="https://media-3.api-sports.io/football/teams/53.png" alt="Manchester City"
-                                                width="40px" height="40px">
-                                            <span class="team-name d-none">Manchester City</span>
-                                        </div>
-                                    </a>
-                                </td>
                                 <td>
                                     <a href="" class="player-info-link">
                                         <div class="is-injuried d-flex align-center relative">
@@ -402,8 +379,11 @@
                                                 alt="Erling Haaland"
                                                 style="border: 1px solid rgba(34, 34, 38, 0.15);border-radius: 50%;object-fit: cover;height: 40px;width: 40px;">
                                             <div class="player-info d-flex flex-column">
-                                                <span class="player-name width-100 t-ellipsis">E.Haaland</span>
-                                                <span class="player-position">Forward</span>
+                                                <span class="player-name  t-ellipsis">E.Haaland</span>
+                                                <span class="player-position d-flex" style="gap: 2px;">
+                                                    <img src="https://api.sofascore.app/api/v1/team/17/image" alt="Manchester City" width="15px" height="15px">
+                                                    Forward
+                                                </span>
                                             </div>
                                         </div>
                                     </a>
@@ -416,7 +396,7 @@
                                     </div>
                                 </td>
                                 <td class="from-date" style="text-align: center;">15/10/24</td>
-                                <td class="to-date" style="text-align: center;">15/10/25</td>
+                                <td class="to-date" style="text-align: center;">Unknown</td>
                                 <td>
                                     <div class="add-favorite cursor-pointer d-flex justify-center p-relative" style="top: -2px;"
                                         title="Add to Favorites">
@@ -464,7 +444,6 @@
                     <table>
                         <thead>
                             <tr>
-                                <th style="width: 50px; text-align: center;">Team</th>
                                 <th class="width-150">Player</th>
                                 <th class="width-150">Injury</th>
                                 <th style="text-align: center; width: 65px;">Return</th>
@@ -473,15 +452,6 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td style="position: relative; text-align: center;">
-                                    <a href="" class="team-info-link">
-                                        <div class="team-info d-flex align-center justify-center">
-                                            <img src="https://api.sofascore.app/api/v1/team/17/image" alt="Manchester City"
-                                                width="40px" height="40px">
-                                            <span class="team-name d-none">Manchester City</span>
-                                        </div>
-                                    </a>
-                                </td>
                                 <td>
                                     <a href="" class="player-info-link">
                                         <div class="is-returning d-flex align-center relative">
@@ -489,8 +459,11 @@
                                                 alt="Erling Haaland"
                                                 style="border: 1px solid rgba(34, 34, 38, 0.15);border-radius: 50%;object-fit: cover;height: 40px;width: 40px;">
                                             <div class="player-info d-flex flex-column">
-                                                <span class="player-name width-100 t-ellipsis">E.Haaland</span>
-                                                <span class="player-position">Forward</span>
+                                                <span class="player-name  t-ellipsis">E.Haaland</span>
+                                                <span class="player-position d-flex" style="gap: 2px;">
+                                                    <img src="https://api.sofascore.app/api/v1/team/17/image" alt="Manchester City" width="15px" height="15px">
+                                                    Forward
+                                                </span>
                                             </div>
                                         </div>
                                     </a>
@@ -517,15 +490,6 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td style="position: relative; text-align: center;">
-                                    <a href="" class="team-info-link">
-                                        <div class="team-info d-flex align-center justify-center">
-                                            <img src="https://media-3.api-sports.io/football/teams/52.png" alt="Manchester City"
-                                                width="40px" height="40px">
-                                            <span class="team-name d-none">Manchester City</span>
-                                        </div>
-                                    </a>
-                                </td>
                                 <td>
                                     <a href="" class="player-info-link">
                                         <div class="is-returning d-flex align-center relative">
@@ -533,8 +497,11 @@
                                                 alt="Erling Haaland"
                                                 style="border: 1px solid rgba(34, 34, 38, 0.15);border-radius: 50%;object-fit: cover;height: 40px;width: 40px;">
                                             <div class="player-info d-flex flex-column">
-                                                <span class="player-name width-100 t-ellipsis">E.Haaland</span>
-                                                <span class="player-position">Forward</span>
+                                                <span class="player-name  t-ellipsis">E.Haaland</span>
+                                                <span class="player-position d-flex" style="gap: 2px;">
+                                                    <img src="https://api.sofascore.app/api/v1/team/17/image" alt="Manchester City" width="15px" height="15px">
+                                                    Forward
+                                                </span>
                                             </div>
                                         </div>
                                     </a>
@@ -561,15 +528,6 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td style="position: relative; text-align: center;">
-                                    <a href="" class="team-info-link">
-                                        <div class="team-info d-flex align-center justify-center">
-                                            <img src="https://media-3.api-sports.io/football/teams/51.png" alt="Manchester City"
-                                                width="40px" height="40px">
-                                            <span class="team-name d-none">Manchester City</span>
-                                        </div>
-                                    </a>
-                                </td>
                                 <td>
                                     <a href="" class="player-info-link">
                                         <div class="is-returning d-flex align-center relative">
@@ -577,8 +535,11 @@
                                                 alt="Erling Haaland"
                                                 style="border: 1px solid rgba(34, 34, 38, 0.15);border-radius: 50%;object-fit: cover;height: 40px;width: 40px;">
                                             <div class="player-info d-flex flex-column">
-                                                <span class="player-name width-100 t-ellipsis">E.Haaland</span>
-                                                <span class="player-position">Forward</span>
+                                                <span class="player-name  t-ellipsis">E.Haaland</span>
+                                                <span class="player-position d-flex" style="gap: 2px;">
+                                                    <img src="https://api.sofascore.app/api/v1/team/17/image" alt="Manchester City" width="15px" height="15px">
+                                                    Forward
+                                                </span>
                                             </div>
                                         </div>
                                     </a>
@@ -605,15 +566,6 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td style="position: relative; text-align: center;">
-                                    <a href="" class="team-info-link">
-                                        <div class="team-info d-flex align-center justify-center">
-                                            <img src="https://media-3.api-sports.io/football/teams/53.png" alt="Manchester City"
-                                                width="40px" height="40px">
-                                            <span class="team-name d-none">Manchester City</span>
-                                        </div>
-                                    </a>
-                                </td>
                                 <td>
                                     <a href="" class="player-info-link">
                                         <div class="is-returning d-flex align-center relative">
@@ -621,8 +573,11 @@
                                                 alt="Erling Haaland"
                                                 style="border: 1px solid rgba(34, 34, 38, 0.15);border-radius: 50%;object-fit: cover;height: 40px;width: 40px;">
                                             <div class="player-info d-flex flex-column">
-                                                <span class="player-name width-100 t-ellipsis">E.Haaland</span>
-                                                <span class="player-position">Forward</span>
+                                                <span class="player-name  t-ellipsis">E.Haaland</span>
+                                                <span class="player-position d-flex" style="gap: 2px;">
+                                                    <img src="https://api.sofascore.app/api/v1/team/17/image" alt="Manchester City" width="15px" height="15px">
+                                                    Forward
+                                                </span>
                                             </div>
                                         </div>
                                     </a>
@@ -649,15 +604,6 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td style="position: relative; text-align: center;">
-                                    <a href="" class="team-info-link">
-                                        <div class="team-info d-flex align-center justify-center">
-                                            <img src="https://media-3.api-sports.io/football/teams/53.png" alt="Manchester City"
-                                                width="40px" height="40px">
-                                            <span class="team-name d-none">Manchester City</span>
-                                        </div>
-                                    </a>
-                                </td>
                                 <td>
                                     <a href="" class="player-info-link">
                                         <div class="is-returning d-flex align-center relative">
@@ -665,8 +611,11 @@
                                                 alt="Erling Haaland"
                                                 style="border: 1px solid rgba(34, 34, 38, 0.15);border-radius: 50%;object-fit: cover;height: 40px;width: 40px;">
                                             <div class="player-info d-flex flex-column">
-                                                <span class="player-name width-100 t-ellipsis">E.Haaland</span>
-                                                <span class="player-position">Forward</span>
+                                                <span class="player-name  t-ellipsis">E.Haaland</span>
+                                                <span class="player-position d-flex" style="gap: 2px;">
+                                                    <img src="https://api.sofascore.app/api/v1/team/17/image" alt="Manchester City" width="15px" height="15px">
+                                                    Forward
+                                                </span>
                                             </div>
                                         </div>
                                     </a>
@@ -707,7 +656,7 @@
                     </div>
                 </div>
             </div>
-            <div class="content-tab  mt-12">
+            <div class="content-tab  mt-12 about-us-tab">
                 <h5 style="margin: 12px 0;">Welcome to InjuryKick – Your Ultimate Football Injury Analysis Platform!</h5>
                 <section class=" mt-12 border-radius" style="font-size: var(--font-size-sm)!important;">
                     <p style="font-size: var(--font-size-base);">
@@ -768,16 +717,19 @@
                         </div>
                     </a>
                     <a href="" class="fixture-match">
-                        <div class="upcom-info">
-                            Tomorrow, 00:00
+                        <div class="upcom-info d-flex align-center justify-space-between">
+                            <div class="upcom-time">Tomorrow, 00:00</div>
+                            <div class="upcom-title">Injury</div>
                         </div>
                         <div class="match--home d-flex p-relative align-center">
                             <img class="mr-8 img-custom-class-1" src="https://media-1.api-sports.io/football/teams/41.png" height="24" width="24" alt="Southampton">
-                            Southampton
+                            <div class="match--item-team-name text-truncate">Manchester City</div>
+                            <div class="injury-count">1</div>
                         </div>
                         <div class="match--away d-flex p-relative align-center">
                             <img class="mr-8 img-custom-class-1" src="https://media-1.api-sports.io/football/teams/41.png" height="24" width="24" alt="Southampton">
-                            Southampton
+                            <div class="match--item-team-name text-truncate">Manchester City</div>
+                            <div class="injury-count no-injury">0</div>
                         </div>
                     </a>
                 </div>
@@ -794,16 +746,19 @@
                         </div>
                     </a>
                     <a href="" class="fixture-match">
-                        <div class="upcom-info">
-                            Tomorrow, 00:00
+                        <div class="upcom-info d-flex align-center justify-space-between">
+                            <div class="upcom-time">Tomorrow, 00:00</div>
+                            <div class="upcom-title">Injury</div>
                         </div>
                         <div class="match--home d-flex p-relative align-center">
                             <img class="mr-8 img-custom-class-1" src="https://media-1.api-sports.io/football/teams/41.png" height="24" width="24" alt="Southampton">
-                            Southampton
+                            <div class="match--item-team-name text-truncate">Manchester City</div>
+                            <div class="injury-count">2</div>
                         </div>
                         <div class="match--away d-flex p-relative align-center">
                             <img class="mr-8 img-custom-class-1" src="https://media-1.api-sports.io/football/teams/41.png" height="24" width="24" alt="Southampton">
-                            Southampton
+                            <div class="match--item-team-name text-truncate">Manchester City</div>
+                            <div class="injury-count no-injury">0</div>
                         </div>
                     </a>
                 </div>
@@ -819,7 +774,7 @@
                     <div class="match--info-filter-level-2 d-flex">
                         <a href="" class="selected d-flex">EPL</a>
                     <a href="" class="d-flex">GER</a><a href="" class="d-flex">SPA</a><a href="" class="d-flex">ITA</a><a href="" class="d-flex">FRA</a></div>
-                    <table class="statistic-standings-table__table">
+                    <table class="statistic-standings-table__table mt-8">
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -1132,8 +1087,73 @@
                     </div>
                 </div>
             </div>
+            <div class="quick-stats-title" style="margin: 1rem 0; font-size: var(--h5);">
+                <span>🙋‍♂️ Follow Us</span>
+            </div>
+            <div class="content-tab">
+                <div class="social-callout">
+                    
+                    <div class="social-callout__socials d-flex align-center justify-center gap-1">
+                        <a href="" target="_blank">
+                            <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="40" height="40" viewBox="0 0 30 30">
+                                <path d="M15,3C8.373,3,3,8.373,3,15c0,6.016,4.432,10.984,10.206,11.852V18.18h-2.969v-3.154h2.969v-2.099c0-3.475,1.693-5,4.581-5 c1.383,0,2.115,0.103,2.461,0.149v2.753h-1.97c-1.226,0-1.654,1.163-1.654,2.473v1.724h3.593L19.73,18.18h-3.106v8.697 C22.481,26.083,27,21.075,27,15C27,8.373,21.627,3,15,3z">
+                                </path>
+                            </svg>
+                        </a>
+                        <a href="" target="_blank">
+                            <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="40" height="40" viewBox="0 0 30 30">
+                                <path d="M 6 4 C 4.895 4 4 4.895 4 6 L 4 24 C 4 25.105 4.895 26 6 26 L 24 26 C 25.105 26 26 25.105 26 24 L 26 6 C 26 4.895 25.105 4 24 4 L 6 4 z M 8.6484375 9 L 13.259766 9 L 15.951172 12.847656 L 19.28125 9 L 20.732422 9 L 16.603516 13.78125 L 21.654297 21 L 17.042969 21 L 14.056641 16.730469 L 10.369141 21 L 8.8945312 21 L 13.400391 15.794922 L 8.6484375 9 z M 10.878906 10.183594 L 17.632812 19.810547 L 19.421875 19.810547 L 12.666016 10.183594 L 10.878906 10.183594 z">
+                                </path>
+                            </svg>
+                        </a>
+                        <!---->
+                    </div>
+                    <div class="social-callout__label d-flex justify-center align-center" style="gap: 8px;font-size: var(--font-size-sm);">
+                        Follow us
+                        <strong>@Injurykick</strong>
+                    </div>
+                </div>
+            </div><div class="quick-stats-title" style="margin: 1rem 0; font-size: var(--h5);">
+                <span>👉 Contact or Feedback Us</span>
+            </div>
+            <div class="content-tab">
+                <div class="contact-text">
+                    To make sure your query or feedback gets to the right person, please use the form below. We review every email and will get back to you in case we need you to provide more information. Thank you for taking the time to submit your feedback.
+                </div>
+                <form action="#" method="POST" class="contact-form mt-12">
+                    <div class="form-group">
+                        <label for="full-name">Full Name</label>
+                        <input type="text" id="full-name" name="full-name" required="">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required="">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" rows="4" required=""></textarea>
+                    </div>
+                    <button type="submit" class="action-btn mt-8">Send Message</button>
+                </form>
+            </div>
         </div>
     </main>
+    <section class="mobile-menu d-flex justify-center">
+        <div class="mobile-menu-wrapper d-flex justify-space-around align-center">
+            <a href="" class="mobile-menu-item">
+                <span style="font-size: 20px;">📊</span>
+                Analysis
+            </a>
+            <a href="" class="mobile-menu-item">
+                <span style="font-size: 20px;">📰</span>
+                News
+            </a>
+            <a href="" class="mobile-menu-item">
+                <span style="font-size: 20px;">⭐️</span>
+                Favorites
+            </a>
+        </div>
+    </section>
     <footer class="footer">
         <div class="footer--wrapper-bottom d-flex flex-column mt-12">
             <nav class="footer--links">
@@ -1173,6 +1193,41 @@
         });
     </script>
     
+    <script>
+        // Lấy các phần tử
+        const searchIcon = document.getElementById('search-icon');
+        const modal = document.getElementById('search-modal');
+        const overlay = document.getElementById('overlay');
+        const closeBtn = document.getElementById('close-btn');
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
+      
+        // Mở modal
+        searchIcon.addEventListener('click', () => {
+          modal.classList.add('active');
+          overlay.classList.add('active');
+        });
+      
+        // Đóng modal
+        function closeModal() {
+          modal.classList.remove('active');
+          overlay.classList.remove('active');
+        }
+      
+        closeBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click', closeModal);
+      
+        // Xử lý tìm kiếm
+        searchInput.addEventListener('input', (e) => {
+          const query = e.target.value.trim().toLowerCase();
+      
+          if (query) {
+            searchResults.innerHTML = `<p>Searching for: <strong>${query}</strong></p>`;
+          } else {
+            searchResults.innerHTML = 'No results yet.';
+          }
+        });
+      </script>
     
 </body>
 </html>
